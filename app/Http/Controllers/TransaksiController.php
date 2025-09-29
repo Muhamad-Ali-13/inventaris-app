@@ -13,9 +13,18 @@ class TransaksiController extends Controller
 {
     public function index()
     {
-        $transaksi = Transaksi::with(['user','departemen','details.barang'])->latest()->get();
+        $query = Transaksi::with(['user', 'departemen', 'details.barang'])->latest();
+
+        // Filter user biasa: hanya transaksi miliknya sendiri
+        if (Auth::user()->role !== 'A') { // asumsi 'A' = admin
+            $query->where('user_id', Auth::id());
+        }
+
+        $transaksi = $query->get();
+
         return view('transaksi.index', compact('transaksi'));
     }
+
 
     public function create()
     {

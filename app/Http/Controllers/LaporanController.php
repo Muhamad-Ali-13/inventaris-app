@@ -5,17 +5,21 @@ namespace App\Http\Controllers;
 use App\Models\Transaksi;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Auth;
 
 class LaporanController extends Controller
 {
     public function index(Request $request)
     {
-        $tanggal_awal  = $request->input('tanggal_awal', null);
+        $tanggal_awal = $request->input('tanggal_awal', null);
         $tanggal_akhir = $request->input('tanggal_akhir', null);
 
         $query = Transaksi::with(['departemen', 'details.barang']);
 
-        // Filter tanggal jika diisi
+        if (Auth::user()->role !== 'A') {
+            $query->where('user_id', Auth::id());
+        }
+
         if ($tanggal_awal && $tanggal_akhir) {
             $query->whereDate('tanggal_approval', '>=', $tanggal_awal)
                 ->whereDate('tanggal_approval', '<=', $tanggal_akhir);
@@ -30,10 +34,14 @@ class LaporanController extends Controller
 
     public function exportPdf(Request $request)
     {
-        $tanggal_awal  = $request->input('tanggal_awal', null);
+        $tanggal_awal = $request->input('tanggal_awal', null);
         $tanggal_akhir = $request->input('tanggal_akhir', null);
 
         $query = Transaksi::with(['departemen', 'details.barang']);
+
+        if (Auth::user()->role !== 'A') {
+            $query->where('user_id', Auth::id());
+        }
 
         if ($tanggal_awal && $tanggal_akhir) {
             $query->whereDate('tanggal_approval', '>=', $tanggal_awal)
