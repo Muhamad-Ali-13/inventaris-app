@@ -1,0 +1,46 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Departemen;
+use Illuminate\Http\Request;
+
+class DepartemenController extends Controller
+{
+    public function index()
+    {
+        $departemen = Departemen::all();
+        return view('departemen.index', compact('departemen'));
+    }
+
+    public function create()
+    {
+        return view('departemen.create');
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate(['nama_departemen' => 'required|string|max:255']);
+        Departemen::create($request->all());
+        return redirect()->route('departemen.index')->with('success', 'Departemen berhasil ditambahkan');
+    }
+
+    public function edit(Departemen $departemen)
+    {
+        return view('departemen.edit', compact('departemen'));
+    }
+
+    public function update(Request $request, Departemen $departemen)
+    {
+        $request->validate(['nama_departemen' => 'required|string|max:255']);
+        $departemen->update($request->all());
+        return redirect()->route('departemen.index')->with('success', 'Departemen berhasil diperbarui');
+    }
+
+
+    public function destroy(Departemen $departeman)
+    {
+        $departeman->delete();
+        return redirect()->route('departemen.index')->with('success', 'Departemen berhasil dihapus');
+    }
+}
