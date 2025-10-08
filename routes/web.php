@@ -30,10 +30,13 @@ Route::middleware('auth')->group(function () {
     Route::get('laporan', [App\Http\Controllers\LaporanController::class, 'index'])->name('laporan.index');
     Route::get('laporan/pdf', [App\Http\Controllers\LaporanController::class, 'exportPdf'])->name('laporan.exportPdf');
     Route::get('laporan/excel', [App\Http\Controllers\LaporanController::class, 'exportExcel'])->name('laporan.exportExcel');
+    Route::resource('karyawans', App\Http\Controllers\KaryawanController::class)->middleware('can:role-A');
 
     // Tambahan untuk approve/reject transaksi
     Route::post('transaksi/{transaksi}/approve', [TransaksiController::class, 'approve'])->name('transaksi.approve');
     Route::post('transaksi/{transaksi}/reject', [TransaksiController::class, 'reject'])->name('transaksi.reject');
+    Route::post('/transaksi/{id}/approve', [TransaksiController::class, 'approve'])->name('transaksi.approve');
+    Route::post('/transaksi/{id}/reject', [TransaksiController::class, 'reject'])->name('transaksi.reject');
 });
 
 require __DIR__ . '/auth.php';
