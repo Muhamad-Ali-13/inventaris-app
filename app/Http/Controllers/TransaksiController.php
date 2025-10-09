@@ -36,6 +36,7 @@ class TransaksiController extends Controller
             ->paginate($entries);
 
         $barang = Barang::all();
+        $departemen = Departemen::all();
         $users = User::all();
         $departemen = Departemen::all();
 

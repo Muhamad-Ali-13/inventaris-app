@@ -1,81 +1,77 @@
+{{-- resources/views/departemen/index.blade.php --}}
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Departemen') }}
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            {{ __('Manajemen Departemen') }}
         </h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="gap-5 items-start flex">
+    <div class="py-10 bg-gray-50 min-h-screen">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <!-- FORM INPUT -->
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg w-1/2 p-4">
-                    <div class="p-4 bg-gray-100 mb-2 rounded-xl font-bold">
-                        FORM INPUT DEPARTEMEN
-                    </div>
-                    <form class="max-w-sm mx-auto" method="POST" action="{{ route('departemen.store') }}">
+                <div class="bg-white rounded-xl shadow-md p-6 border border-gray-200">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-700 border-b pb-2">
+                        Tambah Departemen
+                    </h3>
+
+                    <form action="{{ route('departemen.store') }}" method="POST">
                         @csrf
-                        <div class="mb-5">
-                            <label for="nama_departemen"
-                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                        <div class="mb-4">
+                            <label for="nama_departemen" class="block text-sm font-medium text-gray-700 mb-1">
                                 Nama Departemen
                             </label>
                             <input type="text" name="nama_departemen" id="nama_departemen"
-                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg 
-                                       focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 
-                                       dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 
-                                       dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                required placeholder="Contoh: Keuangan" />
+                                placeholder="Contoh: Keuangan"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                required>
                         </div>
                         <button type="submit"
-                            class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none 
-                                   focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto 
-                                   px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 
-                                   dark:focus:ring-blue-800">
+                            class="bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg px-5 py-2.5 transition">
                             Simpan
                         </button>
                     </form>
                 </div>
 
                 <!-- TABEL DATA -->
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg w-full p-4">
-                    <div class="p-4 bg-gray-100 mb-2 rounded-xl font-bold">
-                        DATA DEPARTEMEN
-                    </div>
-                    <div class="relative overflow-x-auto">
-                        <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                            <thead
-                                class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                <div class="bg-white rounded-xl shadow-md p-6 border border-gray-200">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-700 border-b pb-2">
+                        Data Departemen
+                    </h3>
+
+                    <!-- Tabel untuk Desktop -->
+                    <div class="hidden md:block overflow-x-auto">
+                        <table class="w-full text-sm text-left text-gray-600">
+                            <thead class="bg-blue-50 text-gray-700 uppercase text-xs font-semibold">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3 bg-gray-100">NO</th>
-                                    <th scope="col" class="px-6 py-3">NAMA DEPARTEMEN</th>
-                                    <th scope="col" class="px-6 py-3">ACTION</th>
+                                    <th class="px-6 py-3 text-center">No</th>
+                                    <th class="px-6 py-3">Nama Departemen</th>
+                                    <th class="px-6 py-3 text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @php $no = 1; @endphp
                                 @foreach ($departemen as $d)
-                                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                                        <th scope="row"
-                                            class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white bg-gray-100">
-                                            {{ $no++ }}
-                                        </th>
-                                        <td class="px-6 py-4 bg-gray-100">{{ $d->nama_departemen }}</td>
-                                        <td class="px-6 py-4">
+                                    <tr class="border-t hover:bg-gray-50 transition">
+                                        <td class="px-6 py-3 text-center font-medium text-gray-700">{{ $no++ }}</td>
+                                        <td class="px-6 py-3">{{ $d->nama_departemen }}</td>
+                                        <td class="px-6 py-3 flex justify-center gap-2">
                                             <button type="button"
-                                                class="bg-amber-400 p-3 w-10 h-10 rounded-xl text-white hover:bg-amber-500"
-                                                onclick="editDepartemenModal(this)" data-modal-target="departemenModal"
-                                                data-id="{{ $d->id }}" data-nama="{{ $d->nama_departemen }}">
-                                                <i class="fi fi-sr-file-edit"></i>
+                                                onclick="editDepartemenModal(this)"
+                                                data-id="{{ $d->id }}"
+                                                data-nama="{{ $d->nama_departemen }}"
+                                                class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-2 rounded-md transition">
+                                                <i class="fa-solid fa-pen-to-square"></i>
                                             </button>
+
                                             <form action="{{ route('departemen.destroy', $d->id) }}" method="POST"
-                                                class="inline-block"
-                                                onsubmit="return confirm('Yakin ingin menghapus data ini?')">
+                                                onsubmit="return confirm('Yakin ingin menghapus data ini?')"
+                                                class="inline-block">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit"
-                                                    class="bg-red-500 p-3 w-10 h-10 rounded-xl text-white hover:bg-red-600">
-                                                    <i class="fi fi-sr-trash"></i>
+                                                    class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-md transition">
+                                                    <i class="fa-solid fa-trash"></i>
                                                 </button>
                                             </form>
                                         </td>
@@ -84,78 +80,116 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Card Flutter-style untuk Mobile -->
+                    <div class="space-y-4 md:hidden">
+                        @php $no = 1; @endphp
+                        @foreach ($departemen as $index => $d)
+                            <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 shadow-sm transform transition duration-500 ease-out opacity-0 translate-y-6 card-animate"
+                                style="animation-delay: {{ $index * 0.1 }}s;">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h4 class="text-base font-semibold text-gray-800">
+                                        {{ $no++ }}. {{ $d->nama_departemen }}
+                                    </h4>
+                                </div>
+
+                                <div class="flex justify-end gap-2">
+                                    <button type="button"
+                                        onclick="editDepartemenModal(this)"
+                                        data-id="{{ $d->id }}"
+                                        data-nama="{{ $d->nama_departemen }}"
+                                        class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-2 rounded-md transition">
+                                        <i class="fa-solid fa-pen"></i> Edit
+                                    </button>
+
+                                    <form action="{{ route('departemen.destroy', $d->id) }}" method="POST"
+                                        onsubmit="return confirm('Yakin ingin menghapus data ini?')"
+                                        class="inline-block">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit"
+                                            class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-md transition">
+                                            <i class="fa-solid fa-trash"></i> Hapus
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- MODAL EDIT -->
-    <div class="fixed inset-0 flex items-center justify-center z-50 hidden" id="departemenModal">
-        <div class="fixed inset-0 bg-black opacity-50"></div>
-        <div class="fixed inset-0 flex items-center justify-center">
-            <div class="w-full md:w-1/2 relative bg-white rounded-lg shadow mx-5">
-                <div class="flex items-start justify-between p-4 border-b rounded-t">
-                    <h3 class="text-xl font-semibold text-gray-900">Update Departemen</h3>
-                    <button type="button" onclick="departemenModalClose(this)" data-modal-target="departemenModal"
-                        class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg 
-                               text-sm w-8 h-8 ml-auto inline-flex justify-center items-center">
-                        <i class="fa-solid fa-xmark"></i>
+    <div id="departemenModal" class="hidden fixed inset-0 z-50 flex items-center justify-center">
+        <div class="fixed inset-0 bg-black bg-opacity-40" onclick="departemenModalClose(this)"></div>
+
+        <div class="relative bg-white rounded-xl shadow-lg w-full max-w-md mx-5 p-6">
+            <div class="flex items-center justify-between border-b pb-3 mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">Edit Departemen</h3>
+                <button onclick="departemenModalClose(this)" class="text-gray-500 hover:text-gray-800 text-xl">
+                    &times;
+                </button>
+            </div>
+
+            <form method="POST" id="formDepartemenModal">
+                @csrf
+                <input type="hidden" name="_method" value="PATCH">
+                <div class="mb-4">
+                    <label for="edit_nama_departemen" class="block text-sm font-medium text-gray-700 mb-1">
+                        Nama Departemen
+                    </label>
+                    <input type="text" name="nama_departemen" id="edit_nama_departemen"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        required>
+                </div>
+
+                <div class="flex justify-end gap-2 mt-4">
+                    <button type="button" onclick="departemenModalClose(this)"
+                        class="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition">
+                        Batal
+                    </button>
+                    <button type="submit"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                        Simpan
                     </button>
                 </div>
-                <form method="POST" id="formDepartemenModal">
-                    @csrf
-                    <div class="flex flex-col p-4 space-y-6">
-                        <div>
-                            <label for="nama_departemen"
-                                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nama
-                                Departemen</label>
-                            <input type="text" name="nama_departemen" id="edit_nama_departemen"
-                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg 
-                                       focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 
-                                       dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 
-                                       dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                required />
-                        </div>
-                    </div>
-                    <div class="flex items-center p-4 space-x-2 border-t border-gray-200 rounded-b">
-                        <button type="submit" id="formDepartemenButton"
-                            class="bg-green-400 m-2 w-40 h-10 rounded-xl hover:bg-green-500">Simpan</button>
-                        <button type="button" data-modal-target="departemenModal" onclick="departemenModalClose(this)"
-                            class="bg-red-500 m-2 w-40 h-10 rounded-xl text-white hover:bg-red-600">Batal</button>
-                    </div>
-                </form>
-            </div>
+            </form>
         </div>
     </div>
+
+    <style>
+        /* Animasi Flutter-style */
+        @keyframes fadeUp {
+            0% {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card-animate {
+            animation: fadeUp 0.5s ease forwards;
+        }
+    </style>
 
     <script>
         const editDepartemenModal = (button) => {
             const id = button.dataset.id;
             const nama = button.dataset.nama;
-
-            let url = "{{ route('departemen.update', ':id') }}".replace(':id', id);
+            const url = "{{ route('departemen.update', ':id') }}".replace(':id', id);
 
             document.getElementById('edit_nama_departemen').value = nama;
             document.getElementById('formDepartemenModal').setAttribute('action', url);
+            document.getElementById('departemenModal').classList.remove('hidden');
+        };
 
-            // tambahkan method PATCH
-            let methodInput = document.createElement('input');
-            methodInput.setAttribute('type', 'hidden');
-            methodInput.setAttribute('name', '_method');
-            methodInput.setAttribute('value', 'PATCH');
-
-            const form = document.getElementById('formDepartemenModal');
-            if (!form.querySelector('input[name="_method"]')) {
-                form.appendChild(methodInput);
-            }
-
-            // tampilkan modal
-            document.getElementById('departemenModal').classList.toggle('hidden');
-        }
-
-        const departemenModalClose = (button) => {
-            const modalTarget = button.dataset.modalTarget;
-            document.getElementById(modalTarget).classList.toggle('hidden');
-        }
+        const departemenModalClose = () => {
+            document.getElementById('departemenModal').classList.add('hidden');
+        };
     </script>
 </x-app-layout>

@@ -1,160 +1,215 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Barang') }}
+        <h2 class="font-semibold text-2xl text-gray-800 leading-tight">
+            {{ __('Manajemen Barang') }}
         </h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="gap-5 items-start flex">
-                <!-- FORM INPUT -->
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg w-1/2 p-4">
-                    <div class="p-4 bg-gray-100 mb-2 rounded-xl font-bold">
-                        FORM INPUT BARANG
-                    </div>
-                    <form method="POST" action="{{ route('barang.store') }}">
-                        @csrf
-                        <div class="mb-3">
-                            <label for="nama_barang" class="block text-sm font-medium">Nama Barang</label>
-                            <input type="text" name="nama_barang" id="nama_barang" required
-                                class="w-full rounded-lg border-gray-300 dark:bg-gray-700 dark:text-white" />
-                        </div>
+    <div class="py-10 bg-gray-50 min-h-screen">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="bg-white shadow-md rounded-xl p-6 border border-gray-100">
 
-                        <div class="mb-3">
-                            <label for="kategori_id" class="block text-sm font-medium">Kategori</label>
-                            <select name="kategori_id" id="kategori_id" required
-                                class="w-full rounded-lg border-gray-300 dark:bg-gray-700 dark:text-white">
-                                <option value="">-- Pilih Kategori --</option>
-                                @foreach ($kategori as $k)
-                                    <option value="{{ $k->id }}">{{ $k->nama_kategori }}</option>
-                                @endforeach
-                            </select>
-                        </div>
 
-                        <div class="mb-3">
-                            <label for="stok" class="block text-sm font-medium">Stok</label>
-                            <input type="number" name="stok" id="stok" required min="0"
-                                class="w-full rounded-lg border-gray-300 dark:bg-gray-700 dark:text-white" />
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="satuan" class="block text-sm font-medium">Satuan</label>
-                            <input type="text" name="satuan" id="satuan" required
-                                placeholder="Contoh: pcs, box, unit"
-                                class="w-full rounded-lg border-gray-300 dark:bg-gray-700 dark:text-white" />
-                        </div>
-
-                        <button type="submit"
-                            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                            Simpan
+                <!-- HEADER + BUTTON -->
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-700">Data Barang</h3>
+                    @can('role-A')
+                        <button type="button" onclick="tambahBarangModal()"
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-lg shadow-sm transition">
+                            + Tambah Barang
                         </button>
-                    </form>
+                    @endcan
                 </div>
 
+
                 <!-- TABEL DATA -->
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg w-full p-4">
-                    <div class="p-4 bg-gray-100 mb-2 rounded-xl font-bold">
-                        DATA BARANG
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                            <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                                <tr>
-                                    <th class="px-6 py-3">NO</th>
-                                    <th class="px-6 py-3">NAMA BARANG</th>
-                                    <th class="px-6 py-3">KATEGORI</th>
-                                    <th class="px-6 py-3">STOK</th>
-                                    <th class="px-6 py-3">SATUAN</th>
-                                    <th class="px-6 py-3">ACTION</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @php $no=1; @endphp
-                                @foreach ($barang as $b)
-                                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                                        <td class="px-6 py-4">{{ $no++ }}</td>
-                                        <td class="px-6 py-4">{{ $b->nama_barang }}</td>
-                                        <td class="px-6 py-4">{{ $b->kategori->nama_kategori }}</td>
-                                        <td class="px-6 py-4">{{ $b->stok }}</td>
-                                        <td class="px-6 py-4">{{ $b->satuan }}</td>
-                                        <td class="px-6 py-4">
-                                            <button type="button" class="bg-yellow-500 text-white px-3 py-1 rounded"
-                                                onclick="editBarangModal(this)" 
-                                                data-id="{{ $b->id }}" 
-                                                data-nama="{{ $b->nama_barang }}"
-                                                data-kategori="{{ $b->kategori_id }}"
-                                                data-stok="{{ $b->stok }}"
-                                                data-satuan="{{ $b->satuan }}">
-                                                Edit
+                <div class="overflow-x-auto rounded-lg border border-gray-100">
+                    <table class="w-full text-sm text-left text-gray-600">
+                        <thead class="bg-gray-100 text-gray-700 uppercase text-xs">
+                            <tr>
+                                <th class="px-6 py-3">No</th>
+                                <th class="px-6 py-3">Nama Barang</th>
+                                <th class="px-6 py-3">Kategori</th>
+                                <th class="px-6 py-3">Stok</th>
+                                <th class="px-6 py-3">Satuan</th>
+                                @can('role-A')
+                                    <th class="px-6 py-3 text-center">Aksi</th>
+                                @endcan
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @php $no=1; @endphp
+                            @foreach ($barang as $b)
+                                <tr class="border-b hover:bg-gray-50 transition">
+                                    <td class="px-6 py-3">{{ $no++ }}</td>
+                                    <td class="px-6 py-3">{{ $b->nama_barang }}</td>
+                                    <td class="px-6 py-3">{{ $b->kategori->nama_kategori }}</td>
+                                    <td class="px-6 py-3">{{ $b->stok }}</td>
+                                    <td class="px-6 py-3">{{ $b->satuan }}</td>
+                                    @can('role-A')
+                                        <td class="px-6 py-3 text-center flex justify-center gap-2">
+                                            <button type="button"
+                                                class="bg-amber-400 hover:bg-amber-500 text-white p-2.5 rounded-lg shadow-sm"
+                                                onclick="editBarangModal(this)" data-id="{{ $b->id }}"
+                                                data-nama="{{ $b->nama_barang }}" data-kategori="{{ $b->kategori_id }}"
+                                                data-stok="{{ $b->stok }}" data-satuan="{{ $b->satuan }}">
+                                                <i class="fi fi-sr-file-edit"></i>
                                             </button>
-                                            <form action="{{ route('barang.destroy',$b->id) }}" method="POST"
-                                                class="inline-block"
+
+                                            <form action="{{ route('barang.destroy', $b->id) }}" method="POST"
                                                 onsubmit="return confirm('Yakin ingin menghapus data ini?')">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit"
-                                                    class="bg-red-500 text-white px-3 py-1 rounded">
-                                                    Hapus
+                                                    class="bg-red-500 hover:bg-red-600 text-white p-2.5 rounded-lg shadow-sm">
+                                                    <i class="fi fi-sr-trash"></i>
                                                 </button>
                                             </form>
                                         </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                                    @endcan
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
+
             </div>
         </div>
     </div>
 
-    <!-- MODAL EDIT -->
-    <div class="fixed inset-0 flex items-center justify-center z-50 hidden" id="barangModal">
-        <div class="fixed inset-0 bg-black opacity-50"></div>
-        <div class="relative bg-white rounded-lg shadow w-full max-w-lg mx-5">
-            <div class="flex justify-between items-center p-4 border-b">
-                <h3 class="text-lg font-semibold">Edit Barang</h3>
-                <button type="button" onclick="barangModalClose()" class="text-gray-400 hover:text-gray-900">✕</button>
+    <!-- MODAL TAMBAH -->
+    <div class="fixed inset-0 flex items-center justify-center z-50 hidden" id="tambahBarangModal">
+        <div class="fixed inset-0 bg-black/40 backdrop-blur-sm"></div>
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative z-10">
+            <div class="flex items-center justify-between border-b pb-3 mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">Tambah Barang</h3>
+                <button onclick="tambahBarangModalClose()" class="text-gray-500 hover:text-gray-800 transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
             </div>
-            <form method="POST" id="formBarangModal">
+
+            <form method="POST" action="{{ route('barang.store') }}" class="space-y-4">
                 @csrf
-                <div class="p-4 space-y-3">
-                    <input type="hidden" name="_method" value="PATCH">
+                <div>
+                    <label for="nama_barang" class="block text-sm font-medium text-gray-600 mb-1">Nama Barang</label>
+                    <input type="text" name="nama_barang" id="nama_barang" required
+                        placeholder="Contoh: Pulpen, Buku, Monitor"
+                        class="w-full border border-gray-300 focus:ring-2 focus:ring-indigo-400 
+                               focus:border-indigo-400 rounded-lg px-3 py-2 text-gray-800 placeholder-gray-400 transition duration-200" />
+                </div>
+
+                <div>
+                    <label for="kategori_id" class="block text-sm font-medium text-gray-600 mb-1">Kategori</label>
+                    <select name="kategori_id" id="kategori_id" required
+                        class="w-full border border-gray-300 focus:ring-2 focus:ring-indigo-400 
+                               focus:border-indigo-400 rounded-lg px-3 py-2 text-gray-800 transition duration-200">
+                        <option value="">-- Pilih Kategori --</option>
+                        @foreach ($kategori as $k)
+                            <option value="{{ $k->id }}">{{ $k->nama_kategori }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label for="edit_nama_barang" class="block text-sm font-medium">Nama Barang</label>
-                        <input type="text" name="nama_barang" id="edit_nama_barang" required
-                            class="w-full rounded-lg border-gray-300" />
+                        <label for="stok" class="block text-sm font-medium text-gray-600 mb-1">Stok</label>
+                        <input type="number" name="stok" id="stok" required min="0"
+                            class="w-full border border-gray-300 focus:ring-2 focus:ring-indigo-400 
+                                   focus:border-indigo-400 rounded-lg px-3 py-2 text-gray-800 transition duration-200" />
                     </div>
                     <div>
-                        <label for="edit_kategori_id" class="block text-sm font-medium">Kategori</label>
-                        <select name="kategori_id" id="edit_kategori_id" required
-                            class="w-full rounded-lg border-gray-300">
-                            @foreach ($kategori as $k)
-                                <option value="{{ $k->id }}">{{ $k->nama_kategori }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label for="edit_stok" class="block text-sm font-medium">Stok</label>
-                        <input type="number" name="stok" id="edit_stok" min="0" required
-                            class="w-full rounded-lg border-gray-300" />
-                    </div>
-                    <div>
-                        <label for="edit_satuan" class="block text-sm font-medium">Satuan</label>
-                        <input type="text" name="satuan" id="edit_satuan" required
-                            class="w-full rounded-lg border-gray-300" />
+                        <label for="satuan" class="block text-sm font-medium text-gray-600 mb-1">Satuan</label>
+                        <input type="text" name="satuan" id="satuan" required
+                            placeholder="Contoh: pcs, box, unit"
+                            class="w-full border border-gray-300 focus:ring-2 focus:ring-indigo-400 
+                                   focus:border-indigo-400 rounded-lg px-3 py-2 text-gray-800 transition duration-200" />
                     </div>
                 </div>
-                <div class="flex justify-end p-4 border-t">
-                    <button type="button" onclick="barangModalClose()" class="bg-gray-300 px-4 py-2 rounded mr-2">Batal</button>
-                    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">Simpan</button>
+
+                <div class="flex justify-end gap-3 pt-3 border-t">
+                    <button type="button" onclick="tambahBarangModalClose()"
+                        class="bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium px-5 py-2 rounded-lg">
+                        Batal
+                    </button>
+                    <button type="submit"
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-5 py-2 rounded-lg">
+                        Simpan
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 
+    <!-- MODAL EDIT -->
+    <div class="fixed inset-0 flex items-center justify-center z-50 hidden" id="barangModal">
+        <div class="fixed inset-0 bg-black/40 backdrop-blur-sm"></div>
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative z-10">
+            <div class="flex items-center justify-between border-b pb-3 mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">Edit Barang</h3>
+                <button onclick="barangModalClose()" class="text-gray-500 hover:text-gray-800 transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form method="POST" id="formBarangModal" class="space-y-4">
+                @csrf
+                <input type="hidden" name="_method" value="PATCH">
+                <div>
+                    <label for="edit_nama_barang" class="block text-sm font-medium text-gray-600 mb-1">Nama
+                        Barang</label>
+                    <input type="text" name="nama_barang" id="edit_nama_barang" required
+                        class="w-full border border-gray-300 focus:ring-2 focus:ring-indigo-400 
+                               focus:border-indigo-400 rounded-lg px-3 py-2 text-gray-800 transition duration-200" />
+                </div>
+                <div>
+                    <label for="edit_kategori_id"
+                        class="block text-sm font-medium text-gray-600 mb-1">Kategori</label>
+                    <select name="kategori_id" id="edit_kategori_id" required
+                        class="w-full border border-gray-300 focus:ring-2 focus:ring-indigo-400 
+                               focus:border-indigo-400 rounded-lg px-3 py-2 text-gray-800 transition duration-200">
+                        @foreach ($kategori as $k)
+                            <option value="{{ $k->id }}">{{ $k->nama_kategori }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="edit_stok" class="block text-sm font-medium text-gray-600 mb-1">Stok</label>
+                        <input type="number" name="stok" id="edit_stok" min="0" required
+                            class="w-full border border-gray-300 focus:ring-2 focus:ring-indigo-400 
+                                   focus:border-indigo-400 rounded-lg px-3 py-2 text-gray-800 transition duration-200" />
+                    </div>
+                    <div>
+                        <label for="edit_satuan" class="block text-sm font-medium text-gray-600 mb-1">Satuan</label>
+                        <input type="text" name="satuan" id="edit_satuan" required
+                            class="w-full border border-gray-300 focus:ring-2 focus:ring-indigo-400 
+                                   focus:border-indigo-400 rounded-lg px-3 py-2 text-gray-800 transition duration-200" />
+                    </div>
+                </div>
+                <div class="flex justify-end gap-3 pt-3 border-t">
+                    <button type="button" onclick="barangModalClose()"
+                        class="bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium px-5 py-2 rounded-lg">
+                        Batal
+                    </button>
+                    <button type="submit"
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-5 py-2 rounded-lg">
+                        Simpan Perubahan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- SCRIPT -->
     <script>
+        function tambahBarangModal() {
+            document.getElementById('tambahBarangModal').classList.remove('hidden');
+        }
+
+        function tambahBarangModalClose() {
+            document.getElementById('tambahBarangModal').classList.add('hidden');
+        }
+
         function editBarangModal(button) {
             const id = button.dataset.id;
             const nama = button.dataset.nama;

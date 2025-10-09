@@ -7,128 +7,122 @@ use App\Models\User;
 use App\Models\Departemen;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class KaryawanController extends Controller
 {
     /**
-     * Menampilkan semua data karyawan
+     * Tampilkan daftar karyawan (index view sudah menunggu $karyawans dan $departemen)
      */
     public function index()
     {
-        $karyawans = Karyawan::with(['user', 'departemen'])->latest()->paginate(10);
-        return view('karyawan.index', compact('karyawans'));
-    }
-
-    /**
-     * Menampilkan form tambah karyawan
-     */
-    public function create()
-    {
         $departemen = Departemen::all();
-        return view('karyawan.create', compact('departemen'));
+        $karyawans = Karyawan::with(['user', 'departemen'])->latest()->paginate(10);
+
+        return view('karyawan.index', compact('karyawans', 'departemen'));
     }
 
     /**
-     * Simpan data karyawan baru + user
+     * Simpan karyawan baru + buat user (store)
+     * Sesuai form di index.blade.php: form create mengirim nip, nama_lengkap, departemen_id, no_telp, alamat, tanggal_masuk, email, password
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'nip'            => 'nullable|string|unique:karyawans,nip',
+        $validated = $request->validate([
+            'nip'            => 'nullable|string|max:50|unique:karyawans,nip',
             'nama_lengkap'   => 'required|string|max:255',
             'departemen_id'  => 'nullable|exists:departemen,id',
             'no_telp'        => 'nullable|string|max:20',
-            'alamat'         => 'nullable|string|max:255',
+            'alamat'         => 'nullable|string',
             'tanggal_masuk'  => 'nullable|date',
-            // user fields
-            'email'          => 'required|string|email|max:255|unique:users,email',
-            'password'       => 'required|string|min:6|confirmed',
-            'role'           => 'required|in:A,U',
+
+            // user fields (create form provides email & password)
+            'email'          => 'required|email|max:255|unique:users,email',
+            'password'       => 'required|string|min:6',
+            // role tidak dikirim oleh form -> beri default 'U'
         ]);
 
-        // buat user dulu
-        $user = User::create([
-            'name'     => $request->nama_lengkap,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
-            'role'     => $request->role,
-        ]);
+        DB::beginTransaction();
 
-        // buat karyawan terhubung user_id
-        Karyawan::create([
-            'user_id'        => $user->id,
-            'nip'            => $request->nip,
-            'nama_lengkap'   => $request->nama_lengkap,
-            'departemen_id'  => $request->departemen_id,
-            'no_telp'        => $request->no_telp,
-            'alamat'         => $request->alamat,
-            'tanggal_masuk'  => $request->tanggal_masuk,
-        ]);
+        try {
+            // 1) Buat user dulu
+            $user = User::create([
+                'name'     => $validated['nama_lengkap'],
+                'email'    => $validated['email'],
+                'password' => Hash::make($validated['password']),
+                'role'     => 'U', // default role user (sesuaikan jika sistem Anda memakai 'karyawan' atau 'U')
+            ]);
 
-        return redirect()->route('karyawans.index')->with('success', 'Karyawan & User berhasil ditambahkan.');
+            // 2) Buat karyawan terkait
+            Karyawan::create([
+                'user_id'        => $user->id,
+                'nip'            => $validated['nip'] ?? null,
+                'nama_lengkap'   => $validated['nama_lengkap'],
+                'departemen_id'  => $validated['departemen_id'] ?? null,
+                'no_telp'        => $validated['no_telp'] ?? null,
+                'alamat'         => $validated['alamat'] ?? null,
+                'tanggal_masuk'  => $validated['tanggal_masuk'] ?? null,
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('karyawans.index')->with('success', 'Karyawan & User berhasil ditambahkan.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            // jangan tampilkan exception di production — ini untuk debugging sementara
+            return redirect()->back()->withInput()->withErrors(['general' => 'Gagal menyimpan data: ' . $e->getMessage()]);
+        }
     }
 
     /**
-     * Menampilkan form edit karyawan
-     */
-    public function edit($id)
-    {
-        $karyawan = Karyawan::with('user')->findOrFail($id);
-        $departemen = Departemen::all();
-        return view('karyawan.edit', compact('karyawan', 'departemen'));
-    }
-
-    /**
-     * Update data karyawan + user
+     * Update data karyawan (form edit di index.blade.php hanya mengirim field karyawan)
      */
     public function update(Request $request, $id)
     {
-        $karyawan = Karyawan::with('user')->findOrFail($id);
+        $karyawan = Karyawan::findOrFail($id);
 
-        $request->validate([
-            'nip'            => 'nullable|string|unique:karyawans,nip,' . $karyawan->id,
+        $validated = $request->validate([
+            'nip'            => ['nullable','string','max:50', Rule::unique('karyawans','nip')->ignore($karyawan->id)],
             'nama_lengkap'   => 'required|string|max:255',
             'departemen_id'  => 'nullable|exists:departemen,id',
             'no_telp'        => 'nullable|string|max:20',
-            'alamat'         => 'nullable|string|max:255',
+            'alamat'         => 'nullable|string',
             'tanggal_masuk'  => 'nullable|date',
-            // user fields
-            'email'          => 'required|string|email|max:255|unique:users,email,' . $karyawan->user_id,
-            'password'       => 'nullable|string|min:6|confirmed',
-            'role'           => 'required|in:A,U',
         ]);
 
-        // update user
-        $karyawan->user->update([
-            'name'  => $request->nama_lengkap,
-            'email' => $request->email,
-            'role'  => $request->role,
-            'password' => $request->password ? Hash::make($request->password) : $karyawan->user->password,
-        ]);
-
-        // update karyawan
         $karyawan->update([
-            'nip'            => $request->nip,
-            'nama_lengkap'   => $request->nama_lengkap,
-            'departemen_id'  => $request->departemen_id,
-            'no_telp'        => $request->no_telp,
-            'alamat'         => $request->alamat,
-            'tanggal_masuk'  => $request->tanggal_masuk,
+            'nip'            => $validated['nip'] ?? null,
+            'nama_lengkap'   => $validated['nama_lengkap'],
+            'departemen_id'  => $validated['departemen_id'] ?? null,
+            'no_telp'        => $validated['no_telp'] ?? null,
+            'alamat'         => $validated['alamat'] ?? null,
+            'tanggal_masuk'  => $validated['tanggal_masuk'] ?? null,
         ]);
 
-        return redirect()->route('karyawan.index')->with('success', 'Karyawan & User berhasil diperbarui.');
+        return redirect()->route('karyawans.index')->with('success', 'Karyawan berhasil diperbarui.');
     }
 
     /**
-     * Hapus data karyawan + user
+     * Hapus karyawan (beserta user terkait jika ada)
      */
     public function destroy($id)
     {
         $karyawan = Karyawan::with('user')->findOrFail($id);
 
-        // hapus user otomatis cascade hapus karyawan juga kalau FK ON DELETE CASCADE
-        $karyawan->user->delete();
+        DB::transaction(function () use ($karyawan) {
+            // Jika ada user terkait, hapus user -> jika ada FK cascade, karyawan akan ikut terhapus
+            if ($karyawan->user) {
+                $user = $karyawan->user;
+                $user->delete();
+            }
 
-        return redirect()->route('karyawan.index')->with('success', 'Karyawan & User berhasil dihapus.');
+            // Jika karyawan masih ada (mis. FK tidak cascade), hapus manual
+            if (Karyawan::where('id', $karyawan->id)->exists()) {
+                $karyawan->delete();
+            }
+        });
+
+        return redirect()->route('karyawans.index')->with('success', 'Karyawan & User berhasil dihapus.');
     }
 }
