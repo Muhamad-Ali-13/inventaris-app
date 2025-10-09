@@ -46,7 +46,7 @@ class TransaksiController extends Controller
     {
         $isAdmin = Auth::user()->role === 'A';
         $validated = $request->validate([
-            'tipe' => $isAdmin ? 'required|in:pengeluaran,pemasukan' : 'nullable',
+            'tipe' => $isAdmin ? 'required|in:permintaan,pemasukan' : 'nullable',
             'jumlah' => 'required|numeric|min:0',
             'tanggal_pengajuan' => 'required|date',
             'barang_id' => 'required|array',
@@ -90,7 +90,7 @@ class TransaksiController extends Controller
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            'tipe' => 'required|in:pengeluaran,pemasukan',
+            'tipe' => 'required|in:permintaan,pemasukan',
             'jumlah' => 'required|numeric|min:0',
             'tanggal_pengajuan' => 'required|date',
         ]);
@@ -129,7 +129,7 @@ class TransaksiController extends Controller
             // Update stok barang baru saat approve
             foreach ($transaksi->details as $detail) {
                 $barang = $detail->barang;
-                if ($transaksi->tipe === 'pengeluaran') {
+                if ($transaksi->tipe === 'permintaan') {
                     $barang->stok = max(0, $barang->stok - $detail->jumlah);
                 } else { // pemasukan
                     $barang->stok += $detail->jumlah;

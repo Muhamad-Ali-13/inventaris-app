@@ -154,7 +154,7 @@
                             @if(auth()->user()->role === 'A')
                                 <option value="pemasukan">Pemasukan</option>
                             @endif
-                            <option value="pengeluaran" selected>Pengeluaran</option>
+                            <option value="permintaan" selected>Permintaan</option>
                         </select>
                     </div>
                     <div>
