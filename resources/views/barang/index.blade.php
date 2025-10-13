@@ -9,7 +9,6 @@
         <div class="max-w-7xl mx-auto px-6 lg:px-8">
             <div class="bg-white shadow-md rounded-xl p-6 border border-gray-100">
 
-
                 <!-- HEADER + BUTTON -->
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-semibold text-gray-700">Data Barang</h3>
@@ -21,9 +20,8 @@
                     @endcan
                 </div>
 
-
-                <!-- TABEL DATA -->
-                <div class="overflow-x-auto rounded-lg border border-gray-100">
+                <!-- DESKTOP TABLE -->
+                <div class="overflow-x-auto rounded-lg border border-gray-100 hidden md:block">
                     <table class="w-full text-sm text-left text-gray-600">
                         <thead class="bg-gray-100 text-gray-700 uppercase text-xs">
                             <tr>
@@ -71,6 +69,50 @@
                             @endforeach
                         </tbody>
                     </table>
+                </div>
+
+                <!-- MOBILE CARD VIEW -->
+                <div class="md:hidden space-y-4">
+                    @php $no=1; @endphp
+                    @foreach ($barang as $b)
+                        <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <h4 class="font-semibold text-lg text-gray-800">{{ $b->nama_barang }}</h4>
+                                <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded">
+                                    {{ $b->kategori->nama_kategori }}
+                                </span>
+                            </div>
+                            <div class="text-sm text-gray-600 space-y-1">
+                                <p><strong>Stok:</strong>
+                                    <span class="{{ $b->stok == 0 ? 'text-red-500 font-semibold' : 'text-gray-800' }}">
+                                        {{ $b->stok }}
+                                    </span>
+                                </p>
+                                <p><strong>Satuan:</strong> {{ $b->satuan }}</p>
+                            </div>
+
+                            @can('role-A')
+                                <div class="flex gap-2 mt-4">
+                                    <button type="button"
+                                        class="flex-1 bg-amber-400 hover:bg-amber-500 text-white py-2 rounded-lg text-sm font-medium"
+                                        onclick="editBarangModal(this)" data-id="{{ $b->id }}"
+                                        data-nama="{{ $b->nama_barang }}" data-kategori="{{ $b->kategori_id }}"
+                                        data-stok="{{ $b->stok }}" data-satuan="{{ $b->satuan }}">
+                                        <i class="fi fi-sr-file-edit mr-1"></i> Edit
+                                    </button>
+                                    <form action="{{ route('barang.destroy', $b->id) }}" method="POST"
+                                        onsubmit="return confirm('Yakin ingin menghapus data ini?')" class="flex-1">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit"
+                                            class="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg text-sm font-medium">
+                                            <i class="fi fi-sr-trash mr-1"></i> Hapus
+                                        </button>
+                                    </form>
+                                </div>
+                            @endcan
+                        </div>
+                    @endforeach
                 </div>
 
             </div>

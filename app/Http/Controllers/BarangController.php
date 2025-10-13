@@ -40,6 +40,13 @@ class BarangController extends Controller
         return view('barang.edit', compact('barang', 'kategori'));
     }
 
+
+    public function getByKategori($id)
+    {
+        $barang = Barang::where('kategori_id', $id)->get(['id', 'nama_barang', 'stok']);
+        return response()->json($barang);
+    }
+
     public function update(Request $request, Barang $barang)
     {
         $request->validate([

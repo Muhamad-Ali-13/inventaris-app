@@ -7,6 +7,7 @@ use App\Http\Controllers\LogAktivitasController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\TransaksiDetailController;
+use App\Models\Barang;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -32,7 +33,7 @@ Route::middleware('auth')->group(function () {
     Route::get('laporan/excel', [App\Http\Controllers\LaporanController::class, 'exportExcel'])->name('laporan.exportExcel');
     Route::resource('karyawans', App\Http\Controllers\KaryawanController::class)->middleware('can:role-A');
 
-    // Tambahan untuk approve/reject transaksi
+    Route::get('/barang/by-kategori/{id}', [BarangController::class, 'getByKategori']);
     Route::post('transaksi/{transaksi}/approve', [TransaksiController::class, 'approve'])->name('transaksi.approve');
     Route::post('transaksi/{transaksi}/reject', [TransaksiController::class, 'reject'])->name('transaksi.reject');
     Route::post('/transaksi/{id}/approve', [TransaksiController::class, 'approve'])->name('transaksi.approve');

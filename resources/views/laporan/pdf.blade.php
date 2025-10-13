@@ -63,7 +63,7 @@
 <body>
     <div class="cover" style="text-align: center; margin-bottom: 20px;">
         <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
-            <img src="{{ public_path('image/logo_bpr_ajm.jpg') }}" style="width:80px; height:auto;">
+            <img src="{{ public_path('image/logo.png') }}" style="width:80px; height:auto;">
             <h1 style="margin:0;">PT. Bank Perekonomian Rakyat</h1>
             <h1 style="margin:0;">Artha Jaya Mandiri</h1>
         </div>
@@ -81,10 +81,9 @@
         <thead>
             <tr>
                 <th style="text-align:center">No</th>
-                <th style="text-align:center">Tanggal Approval</th>
+                <th style="text-align:center">Tanggal Disetujui</th>
                 <th style="text-align:center">Departemen</th>
                 <th style="text-align:center">Barang & Jumlah</th>
-                <th style="text-align:center">Total Jumlah</th>
                 <th style="text-align:center">Status</th>
             </tr>
         </thead>
@@ -103,7 +102,6 @@
                             -
                         @endif
                     </td>
-                    <td style="text-align:center">{{ $trx->details->sum('jumlah') }}</td>
                     <td style="text-align:center">{{ ucfirst($trx->status) }}</td>
                 </tr>
             @empty

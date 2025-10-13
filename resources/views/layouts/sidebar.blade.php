@@ -1,3 +1,4 @@
+
 <!-- resources/views/layouts/sidebar.blade.php -->
 <div class="flex h-screen bg-white">
     <!-- Sidebar -->
@@ -5,11 +6,11 @@
         class="hidden md:flex w-64 text-white flex-col bg-gradient-to-b from-emerald-600 via-green-700 to-green-900 shadow-lg">
 
         <!-- Logo -->
-        <div class="h-16 flex items-center justify-center border-b border-green-500/40">
+        <div class="h-16 mt-5 mb-5 flex flex-col items-center justify-center border-b border-green-500/40">
             <a href="{{ route('dashboard') }}" class="flex items-center gap-2">
-                <x-application-logo class="block h-8 w-auto text-white" />
-                <span class="font-bold text-lg tracking-wide">SIAJM</span>
+                <x-application-logo class="block h-10 w-auto text-white" />
             </a>
+            <span class="font-bold text-lg tracking-wide mt-1">SIAJM</span>
         </div>
 
         <!-- Navigation -->
@@ -188,6 +189,14 @@
         <i class="fi fi-rr-exchange text-xl"></i>
         <span class="text-[10px] sm:text-xs">Transaksi</span>
     </a>
+
+    @can('role-A')
+        <a href="{{ route('laporan.index') }}"
+            class="flex flex-col items-center {{ request()->routeIs('laporan.index') ? 'text-green-600 font-semibold' : '' }}">
+            <i class="fi fi-rr-document text-xl"></i>
+            <span class="text-[10px] sm:text-xs">Laporan</span>
+        </a>
+    @endcan
 
     <a href="{{ route('profile.edit') }}"
         class="flex flex-col items-center {{ request()->routeIs('profile.edit') ? 'text-green-600 font-semibold' : '' }}">

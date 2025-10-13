@@ -7,6 +7,7 @@ use App\Models\Barang;
 use App\Models\Departemen;
 use App\Models\TransaksiDetail;
 use App\Models\Karyawan;
+use App\Models\Kategori;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -29,7 +30,7 @@ class TransaksiController extends Controller
 
         $transaksi = $query->when($search, function ($q) use ($search) {
             $q->whereHas('user', fn($uq) => $uq->where('name', 'like', "%$search%"))
-                ->orWhereHas('departemen', fn($dq) => $dq->where('nama', 'like', "%$search%"))
+                ->orWhereHas('departemen', fn($dq) => $dq->where('nama_departemen', 'like', "%$search%"))
                 ->orWhere('tipe', 'like', "%$search%");
         })
             ->orderBy('tanggal_pengajuan', 'desc')
@@ -38,17 +39,17 @@ class TransaksiController extends Controller
         $barang = Barang::all();
         $departemen = Departemen::all();
         $users = User::all();
-        $departemen = Departemen::all();
+        $kategori = Kategori::all();
 
-        return view('transaksi.index', compact('transaksi', 'barang', 'users', 'departemen'));
+        return view('transaksi.index', compact('transaksi', 'barang', 'users', 'departemen', 'kategori'));
     }
 
     public function store(Request $request)
     {
         $isAdmin = Auth::user()->role === 'A';
+
         $validated = $request->validate([
-            'tipe' => $isAdmin ? 'required|in:permintaan,pemasukan' : 'nullable',
-            'jumlah' => 'required|numeric|min:0',
+            'tipe' => $isAdmin ? 'required|in:permintaan,pemasukan,pengeluaran' : 'nullable',
             'tanggal_pengajuan' => 'required|date',
             'barang_id' => 'required|array',
             'barang_id.*' => 'required|exists:barang,id',
@@ -56,42 +57,124 @@ class TransaksiController extends Controller
             'barang_jumlah.*' => 'required|integer|min:1',
         ]);
 
-        $karyawan = Karyawan::where('user_id', Auth::id())->first();
-        if (!$karyawan) {
-            return back()->with('error', 'Data karyawan untuk user ini tidak ditemukan.');
+        // ✅ Jika admin: departemen_id bisa null
+        if ($isAdmin) {
+            $departemenId = null;
+        } else {
+            $karyawan = Karyawan::where('user_id', Auth::id())->first();
+
+            if (!$karyawan) {
+                return back()->with('error', 'Data karyawan untuk user ini tidak ditemukan.');
+            }
+
+            $departemenId = $karyawan->departemen_id;
         }
 
-        DB::transaction(function () use ($validated, $karyawan, $isAdmin) {
-            // Jika bukan admin, tipe otomatis pengeluaran
+        // 🔎 Validasi stok sebelum buat transaksi
+        foreach ($validated['barang_id'] as $i => $barangId) {
+            $barang = Barang::find($barangId);
+            $stok = $validated['stok'][$i] ?? 1;
+
+            // 🚫 Barang tidak boleh stok 0
+            if ($barang->stok <= 0) {
+                return back()->with('error', 'Barang "' . $barang->nama_barang . '" stoknya habis, tidak bisa ditransaksikan.');
+            }
+
+            // 🚫 Barang tidak boleh diminta melebihi stok
+            if ($stok > $barang->stok && (!$isAdmin || $validated['tipe'] === 'pengeluaran')) {
+                return back()->with('error', 'Permintaan barang "' . $barang->nama_barang . '" melebihi stok tersedia (' . $barang->stok . ').');
+            }
+        }
+
+        // 💾 Simpan transaksi
+        DB::transaction(function () use ($validated, $departemenId, $isAdmin) {
             $tipe = $isAdmin ? $validated['tipe'] : 'pengeluaran';
 
             $transaksi = Transaksi::create([
                 'user_id' => Auth::id(),
-                'departemen_id' => $karyawan->departemen_id,
+                'departemen_id' => $departemenId,
                 'tipe' => $tipe,
-                'status' => 'pending', // stok belum berubah
-                'jumlah' => $validated['jumlah'],
+                'status' => 'pending',
                 'tanggal_pengajuan' => $validated['tanggal_pengajuan'],
             ]);
 
-            // Simpan detail transaksi tanpa mengubah stok
             foreach ($validated['barang_id'] as $i => $barangId) {
-                $qty = $validated['barang_jumlah'][$i] ?? 1;
+                $stok = $validated['barang_jumlah'][$i] ?? 1;
+                $barang = Barang::find($barangId);
+
+                // 📦 Simpan detail
                 TransaksiDetail::create([
                     'transaksi_id' => $transaksi->id,
                     'barang_id' => $barangId,
-                    'jumlah' => $qty,
+                    'jumlah' => $stok,
                 ]);
+
+                $qty = $stok;    // jumlah barang   
+
+                // 🧮 Jika tipe pengeluaran → kurangi stok
+                if ($tipe === 'pengeluaran') {
+                    $barang->decrement('stok', $qty);
+                } elseif ($tipe === 'pemasukan') {
+                    $barang->increment('stok', $qty);
+                }
             }
         });
 
         return redirect()->route('transaksi.index')->with('success', 'Transaksi berhasil ditambahkan!');
     }
 
+
+    public function approve($id)
+    {
+        $transaksi = Transaksi::with('details.barang')->findOrFail($id);
+
+        if ($transaksi->status !== 'pending') {
+            return back()->with('error', 'Transaksi sudah diproses.');
+        }
+
+        DB::transaction(function () use ($transaksi) {
+            $transaksi->status = 'approved';
+            $transaksi->tanggal_approval = Carbon::now();
+            $transaksi->save();
+
+            // Update stok sesuai tipe transaksi
+            foreach ($transaksi->details as $detail) {
+                $barang = $detail->barang;
+
+                if ($transaksi->tipe === 'pengeluaran') {
+                    // Barang keluar, stok berkurang
+                    $barang->stok = max(0, $barang->stok - $detail->jumlah);
+                } elseif ($transaksi->tipe === 'pemasukan') {
+                    // Barang masuk, stok bertambah
+                    $barang->stok += $detail->jumlah;
+                }
+
+                $barang->save();
+            }
+        });
+
+        return back()->with('success', 'Transaksi berhasil di-approve dan stok diperbarui.');
+    }
+
+    public function reject($id)
+    {
+        $transaksi = Transaksi::findOrFail($id);
+
+        if ($transaksi->status !== 'pending') {
+            return back()->with('error', 'Transaksi sudah diproses.');
+        }
+
+        $transaksi->status = 'rejected';
+        $transaksi->tanggal_approval = Carbon::now();
+        $transaksi->save();
+
+        return back()->with('success', 'Transaksi berhasil di-reject.');
+    }
+
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            'tipe' => 'required|in:permintaan,pemasukan',
+            'tipe' => 'required|in:pemasukan,pengeluaran',
             'jumlah' => 'required|numeric|min:0',
             'tanggal_pengajuan' => 'required|date',
         ]);
@@ -111,49 +194,5 @@ class TransaksiController extends Controller
         });
 
         return redirect()->route('transaksi.index')->with('success', 'Transaksi berhasil dihapus!');
-    }
-
-    public function approve($id)
-    {
-        $transaksi = Transaksi::with('details.barang')->findOrFail($id);
-
-        if ($transaksi->status !== 'pending') {
-            return back()->with('error', 'Transaksi sudah di proses.');
-        }
-
-        DB::transaction(function () use ($transaksi) {
-            // Update status dan tanggal approval
-            $transaksi->status = 'approved';
-            $transaksi->tanggal_approval = Carbon::now();
-            $transaksi->save();
-
-            // Update stok barang baru saat approve
-            foreach ($transaksi->details as $detail) {
-                $barang = $detail->barang;
-                if ($transaksi->tipe === 'permintaan') {
-                    $barang->stok = max(0, $barang->stok - $detail->jumlah);
-                } else { // pemasukan
-                    $barang->stok += $detail->jumlah;
-                }
-                $barang->save();
-            }
-        });
-
-        return back()->with('success', 'Transaksi berhasil di-approve.');
-    }
-
-    public function reject($id)
-    {
-        $transaksi = Transaksi::findOrFail($id);
-
-        if ($transaksi->status !== 'pending') {
-            return back()->with('error', 'Transaksi sudah di proses.');
-        }
-
-        $transaksi->status = 'rejected';
-        $transaksi->tanggal_approval = Carbon::now();
-        $transaksi->save();
-
-        return back()->with('success', 'Transaksi berhasil di-reject.');
     }
 }

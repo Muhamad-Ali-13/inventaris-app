@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('transaksi', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users');
-            $table->foreignId('departemen_id')->constrained('departemen');
+            $table->foreignId('departemen_id')->nullable()->constrained('departemen')->nullOnDelete();
             $table->enum('tipe', ['pengeluaran', 'pemasukan']);
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->dateTime('tanggal_pengajuan');
