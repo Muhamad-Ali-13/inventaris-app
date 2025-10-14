@@ -1,121 +1,182 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 
 <head>
     <meta charset="utf-8">
-    <title>Laporan Transaksi</title>
+    <title>Laporan Transaksi Inventaris</title>
     <style>
+        @page {
+            size: A4 portrait;
+            margin: 2cm 2cm 2.5cm 2cm;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: "Times New Roman", serif;
             font-size: 12px;
-            color: #333;
+            color: #000;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .header img {
+            width: 80px;
+            height: auto;
+            margin-bottom: 5px;
+        }
+
+        .header h1 {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 2px 0;
+        }
+
+        .header h2 {
+            font-size: 16px;
+            margin: 2px 0;
+        }
+
+        .header p {
+            font-size: 13px;
+            margin: 2px 0;
+        }
+
+        h3 {
+            text-align: center;
+            margin-top: 10px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+
+        .periode {
+            text-align: center;
+            font-size: 12px;
+            margin-bottom: 20px;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
+            font-size: 11.5px;
         }
 
         th,
         td {
-            border: 1px solid #333;
-            padding: 6px;
-            text-align: left;
+            border: 1px solid #000;
+            padding: 6px 8px;
+            vertical-align: top;
         }
 
         th {
-            background: #00FF00;
-            color: #000;
-        }
-
-        /* warna hijau logo */
-        h1,
-        h2,
-        h3 {
-            margin: 0;
-            padding: 0;
-        }
-
-        .cover {
+            background-color: #e5f9e0;
+            font-weight: bold;
             text-align: center;
-            margin-bottom: 50px;
         }
 
-        .logo {
-            width: 120px;
-            margin-bottom: 20px;
+        td {
+            text-align: left;
         }
 
-        .periode {
-            margin-top: 10px;
-            font-size: 14px;
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
         }
 
         .footer {
-            margin-top: 50px;
+            margin-top: 40px;
             font-size: 12px;
             text-align: right;
+        }
+
+        .ttd {
+            margin-top: 50px;
+            width: 100%;
+            text-align: right;
+        }
+
+        .ttd .jabatan {
+            margin-right: 30px;
+            font-size: 12px;
+        }
+
+        .ttd .nama {
+            margin-top: 60px;
+            margin-right: 30px;
+            font-weight: bold;
+            text-decoration: underline;
         }
     </style>
 </head>
 
 <body>
-    <div class="cover" style="text-align: center; margin-bottom: 20px;">
-        <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
-            <img src="{{ public_path('image/logo.png') }}" style="width:80px; height:auto;">
-            <h1 style="margin:0;">PT. Bank Perekonomian Rakyat</h1>
-            <h1 style="margin:0;">Artha Jaya Mandiri</h1>
-        </div>
-
-        <h2 style="margin-top: 20px;">LAPORAN TRANSAKSI INVENTARIS</h2>
-
-        <p class="periode">
-            Periode: {{ date('d-m-Y', strtotime($tanggal_awal)) }} s/d {{ date('d-m-Y', strtotime($tanggal_akhir)) }}
-        </p>
+    {{-- HEADER --}}
+    <div class="header">
+        <img src="{{ public_path('image/logo.png') }}" alt="Logo Perusahaan">
+        <h1>PT. Bank Perekonomian Rakyat Artha Jaya Mandiri</h1>
+        <p>Jl. Dr. Moch Hatta No. 216 Kel. Sukamanah Kec. Cipedes Kota Tasikmalaya</p>
+        <p>Telp. (0265) 5305252| Email: info@arthajaya.co.id</p>
     </div>
 
+    {{-- JUDUL LAPORAN --}}
+    <h3>LAPORAN TRANSAKSI INVENTARIS</h3>
+    <p class="periode">
+        Periode: {{ date('d-m-Y', strtotime($tanggal_awal)) }} s/d {{ date('d-m-Y', strtotime($tanggal_akhir)) }}
+    </p>
 
-    {{-- Tabel Laporan --}}
+    {{-- TABEL DATA --}}
     <table>
         <thead>
             <tr>
-                <th style="text-align:center">No</th>
-                <th style="text-align:center">Tanggal Disetujui</th>
-                <th style="text-align:center">Departemen</th>
-                <th style="text-align:center">Barang & Jumlah</th>
-                <th style="text-align:center">Status</th>
+                <th style="width: 4%">No</th>
+                <th style="width: 15%">Tanggal Disetujui</th>
+                <th style="width: 20%">Departemen</th>
+                <th>Barang & Jumlah</th>
+                <th style="width: 12%">Status</th>
             </tr>
         </thead>
         <tbody>
             @forelse($transaksis as $i => $trx)
                 <tr>
                     <td style="text-align:center">{{ $i + 1 }}</td>
-                    <td style="text-align:center">{{ \Carbon\Carbon::parse($trx->tanggal_approval)->format('d-m-Y') }}</td>
+                    <td style="text-align:center">
+                        {{ $trx->tanggal_approval ? \Carbon\Carbon::parse($trx->tanggal_approval)->format('d-m-Y') : '-' }}
+                    </td>
                     <td style="text-align:center">{{ $trx->departemen->nama_departemen ?? '-' }}</td>
                     <td>
                         @if ($trx->details->count() > 0)
                             @foreach ($trx->details as $d)
-                                {{ $d->barang->nama_barang ?? '-' }} ({{ $d->jumlah }})<br>
+                                • {{ $d->barang->nama_barang ?? '-' }} ({{ $d->jumlah }})<br>
                             @endforeach
                         @else
                             -
                         @endif
                     </td>
-                    <td style="text-align:center">{{ ucfirst($trx->status) }}</td>
+                    <td style="text-align:center">
+                        {{ ucfirst($trx->status) }}
+                    </td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="6" style="text-align:center">Tidak ada data</td>
+                    <td colspan="5" style="text-align:center">Tidak ada data transaksi</td>
                 </tr>
             @endforelse
         </tbody>
     </table>
 
-    {{-- Footer --}}
+    {{-- FOOTER
     <div class="footer">
-        Tanggal cetak: {{ date('d-m-Y') }}<br>
-        {{ Auth::user()->name ?? 'User' }} <br>
+        Dicetak pada: {{ date('d-m-Y') }} <br>
+        Oleh: {{ Auth::user()->name ?? 'User' }}
+    </div> --}}
+
+    {{-- TANDA TANGAN --}}
+    <div class="ttd">
+        <div class="jabatan">Mengetahui,<br> Kepala Bagian Inventaris</div>
+        <div class="nama">{{ Auth::user()->name ?? 'User' }}</div>
     </div>
 </body>
 

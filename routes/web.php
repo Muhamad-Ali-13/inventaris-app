@@ -38,6 +38,7 @@ Route::middleware('auth')->group(function () {
     Route::post('transaksi/{transaksi}/reject', [TransaksiController::class, 'reject'])->name('transaksi.reject');
     Route::post('/transaksi/{id}/approve', [TransaksiController::class, 'approve'])->name('transaksi.approve');
     Route::post('/transaksi/{id}/reject', [TransaksiController::class, 'reject'])->name('transaksi.reject');
+    Route::put('/transaksi/{transaksi}', 'App\Http\Controllers\TransaksiController@update')->name('transaksi.update');
 });
 
 require __DIR__ . '/auth.php';

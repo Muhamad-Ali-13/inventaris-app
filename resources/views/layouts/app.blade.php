@@ -96,6 +96,8 @@
             {{ $slot }}
         </main> --}}
     </div>
+    <!-- Tambahkan sweetalert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
         // In your Javascript (external .js resource or <script> tag)
@@ -106,6 +108,31 @@
         });
     </script>
     @stack('scripts')
+    <!-- Tambahkan di paling bawah layout -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Flash message untuk sukses atau error -->
+    @if (session('success'))
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: '{{ session('success') }}',
+                showConfirmButton: false,
+                timer: 1800
+            })
+        </script>
+    @endif
+
+    @if (session('error'))
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops!',
+                text: '{{ session('error') }}',
+            })
+        </script>
+    @endif
 </body>
 
 </html>

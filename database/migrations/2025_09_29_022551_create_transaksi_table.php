@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users');
             $table->foreignId('departemen_id')->nullable()->constrained('departemen')->nullOnDelete();
-            $table->enum('tipe', ['pengeluaran', 'pemasukan']);
+            $table->enum('jenis', ['pengeluaran', 'pemasukan']);
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->dateTime('tanggal_pengajuan');
             $table->dateTime('tanggal_approval')->nullable();

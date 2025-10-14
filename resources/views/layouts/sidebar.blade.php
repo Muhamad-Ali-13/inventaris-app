@@ -1,4 +1,3 @@
-
 <!-- resources/views/layouts/sidebar.blade.php -->
 <div class="flex h-screen bg-white">
     <!-- Sidebar -->
@@ -6,11 +5,11 @@
         class="hidden md:flex w-64 text-white flex-col bg-gradient-to-b from-emerald-600 via-green-700 to-green-900 shadow-lg">
 
         <!-- Logo -->
-        <div class="h-16 mt-5 mb-5 flex flex-col items-center justify-center border-b border-green-500/40">
+        <div class="h-16  mb-5 flex flex-col items-center justify-center border-b border-green-500/40">
             <a href="{{ route('dashboard') }}" class="flex items-center gap-2">
                 <x-application-logo class="block h-10 w-auto text-white" />
+                <span class="font-bold text-lg tracking-wide mt-1">SIAJM</span>
             </a>
-            <span class="font-bold text-lg tracking-wide mt-1">SIAJM</span>
         </div>
 
         <!-- Navigation -->
@@ -92,8 +91,9 @@
     <div class="flex-1 flex flex-col bg-white">
         <!-- Top bar -->
         <header class="h-16 bg-white border-b flex items-center justify-between px-6 shadow-sm">
-            <div class="text-lg font-bold text-gray-700">
-                Sistem Inventaris <span class="text-green-600">Artha Jaya Mandiri</span>
+            <div class="text-lg font-extrabold text-gray-700">
+                <span class="text-gray-600">Sistem Inventaris</span> <span class="text-green-600">Artha Jaya
+                    Mandiri</span>
             </div>
 
             <!-- Desktop view (nama + avatar) -->
