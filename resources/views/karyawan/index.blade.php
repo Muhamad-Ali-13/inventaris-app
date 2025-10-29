@@ -1,235 +1,268 @@
 {{-- resources/views/karyawan/index.blade.php --}}
 <x-app-layout>
-    <div class="container mx-auto p-4">
+    <div class="container mx-auto p-6">
 
-        {{-- Alert Success --}}
-        @if (session('success'))
-            <div class="bg-green-500 text-white p-3 rounded mb-4">
-                {{ session('success') }}
+        {{-- Header --}}
+        <div
+            class="flex flex-col md:flex-row justify-between items-center bg-white border border-gray-200 rounded-xl shadow-sm p-5 mb-6">
+            <div>
+                <h1 class="text-2xl font-bold text-green-700">📋 Data Karyawan</h1>
+                <p class="text-gray-600 mt-1">Kelola seluruh data karyawan perusahaan dengan mudah.</p>
             </div>
-        @endif
-
-        {{-- Judul --}}
-        <div class="flex justify-between items-center mb-4">
-            <h1 class="text-2xl font-bold">Data Karyawan</h1>
-
-            {{-- Button Tambah (desktop) --}}
             <button onclick="openModal('createModal')"
-                class="hidden md:inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                class="mt-3 md:mt-0 bg-green-600 hover:bg-green-700 text-white font-medium px-5 py-2 rounded-lg shadow-sm">
                 + Tambah Karyawan
             </button>
         </div>
 
-        {{-- Tabel Desktop --}}
-        <div class="hidden md:block overflow-x-auto bg-white shadow rounded">
-            <table class="w-full text-sm text-left">
-                <thead class="bg-gray-100">
+        {{-- Filter & Search --}}
+        <div
+            class="bg-white border border-gray-200 rounded-xl shadow-sm p-4 mb-4 flex flex-col md:flex-row justify-between gap-3">
+            <div class="flex items-center gap-2">
+                <label for="entries" class="text-gray-700 font-medium">Tampilkan</label>
+                <select id="entries" name="entries" class="border-gray-300 rounded-lg text-gray-700"
+                    onchange="updateEntries(this.value)">
+                    <option value="5" {{ request('entries') == 5 ? 'selected' : '' }}>5</option>
+                    <option value="10" {{ request('entries') == 10 ? 'selected' : '' }}>10</option>
+                    <option value="25" {{ request('entries') == 25 ? 'selected' : '' }}>25</option>
+                    <option value="50" {{ request('entries') == 50 ? 'selected' : '' }}>50</option>
+                </select>
+                <span class="text-gray-700">entri</span>
+            </div>
+
+            <form method="GET" action="{{ route('karyawans.index') }}" class="flex gap-2">
+                <input type="text" name="search" placeholder="Cari nama atau departemen..."
+                    value="{{ request('search') }}"
+                    class="w-64 border border-gray-300 rounded-lg px-3 py-2 text-gray-700 focus:ring-2 focus:ring-green-500 focus:outline-none">
+                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
+                    Cari
+                </button>
+            </form>
+        </div>
+
+        {{-- Tabel Data --}}
+        <div class="overflow-x-auto bg-white rounded-xl shadow border border-gray-200">
+            <table class="w-full text-sm text-left text-gray-700">
+                <thead class="bg-green-100 text-green-800">
                     <tr>
-                        <th class="px-4 py-2">No</th>
-                        <th class="px-4 py-2">NIP</th>
-                        <th class="px-4 py-2">Nama Lengkap</th>
-                        <th class="px-4 py-2">Departemen</th>
-                        <th class="px-4 py-2">No Telp</th>
-                        <th class="px-4 py-2">Alamat</th>
-                        <th class="px-4 py-2">Tanggal Masuk</th>
-                        <th class="px-4 py-2">Aksi</th>
+                        <th class="px-4 py-3">No</th>
+                        <th class="px-4 py-3">NIP</th>
+                        <th class="px-4 py-3">Nama Lengkap</th>
+                        <th class="px-4 py-3">Departemen</th>
+                        <th class="px-4 py-3">No Telp</th>
+                        <th class="px-4 py-3">Alamat</th>
+                        <th class="px-4 py-3">Tanggal Masuk</th>
+                        <th class="px-4 py-3 text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($karyawans as $karyawan)
-                        <tr class="border-t">
-                            <td class="px-4 py-2">{{ $loop->iteration }}</td>
-                            <td class="px-4 py-2">{{ $karyawan->nip ?? '-' }}</td>
-                            <td class="px-4 py-2">{{ $karyawan->nama_lengkap }}</td>
-                            <td class="px-4 py-2">{{ $karyawan->departemen->nama_departemen ?? '-' }}</td>
-                            <td class="px-4 py-2">{{ $karyawan->no_telp ?? '-' }}</td>
-                            <td class="px-4 py-2">{{ $karyawan->alamat ?? '-' }}</td>
-                            <td class="px-4 py-2">{{ $karyawan->tanggal_masuk ?? '-' }}</td>
-                            <td class="px-4 py-2 flex gap-2">
-                                <button onclick="openModal('editModal-{{ $karyawan->id }}')"
-                                    class="bg-yellow-500 text-white px-3 py-1 rounded">Edit</button>
-                                <form action="{{ route('karyawans.destroy', $karyawan->id) }}" method="POST"
-                                    onsubmit="return confirm('Yakin hapus karyawan ini?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="bg-red-600 text-white px-3 py-1 rounded">
-                                        Hapus
-                                    </button>
-                                </form>
+                    @forelse ($karyawans as $karyawan)
+                        <tr class="border-t hover:bg-green-50 transition">
+                            <td class="px-4 py-3">{{ $loop->iteration }}</td>
+                            <td class="px-4 py-3">{{ $karyawan->nip ?? '-' }}</td>
+                            <td class="px-4 py-3 font-medium text-gray-800">{{ $karyawan->nama_lengkap }}</td>
+                            <td class="px-4 py-3">{{ $karyawan->departemen->nama_departemen ?? '-' }}</td>
+                            <td class="px-4 py-3">{{ $karyawan->no_telp ?? '-' }}</td>
+                            <td class="px-4 py-3">{{ $karyawan->alamat ?? '-' }}</td>
+                            <td class="px-4 py-3">{{ $karyawan->tanggal_masuk ?? '-' }}</td>
+                            <td class="px-4 py-3 text-center">
+                                <div class="flex justify-center gap-2">
+                                    <button onclick="openModal('editModal-{{ $karyawan->id }}')"
+                                        class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-lg shadow-sm">Edit</button>
+                                    <form action="{{ route('karyawans.destroy', $karyawan->id) }}" method="POST"
+                                        onsubmit="return confirm('Yakin ingin menghapus karyawan ini?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit"
+                                            class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-lg shadow-sm">
+                                            Hapus
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="8" class="text-center text-gray-500 py-4">Tidak ada data karyawan ditemukan.
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
 
-        {{-- Mobile View: Card List --}}
-        <div class="md:hidden space-y-4 mt-4">
-            @foreach ($karyawans as $karyawan)
-                <div class="bg-white shadow rounded p-4">
-                    <h2 class="font-semibold text-lg">{{ $karyawan->nama_lengkap }}</h2>
-                    <p><strong>NIP:</strong> {{ $karyawan->nip ?? '-' }}</p>
-                    <p><strong>Departemen:</strong> {{ $karyawan->departemen->nama_departemen ?? '-' }}</p>
-                    <p><strong>No Telp:</strong> {{ $karyawan->no_telp ?? '-' }}</p>
-                    <p><strong>Alamat:</strong> {{ $karyawan->alamat ?? '-' }}</p>
-                    <p><strong>Tanggal Masuk:</strong> {{ $karyawan->tanggal_masuk ?? '-' }}</p>
-
-                    <div class="flex gap-2 mt-3">
-                        <button onclick="openModal('editModal-{{ $karyawan->id }}')"
-                            class="bg-yellow-500 text-white px-3 py-1 rounded">Edit</button>
-                        <form action="{{ route('karyawans.destroy', $karyawan->id) }}" method="POST"
-                            onsubmit="return confirm('Yakin hapus karyawan ini?')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="bg-red-600 text-white px-3 py-1 rounded">
-                                Hapus
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            @endforeach
-        </div>
-
-        {{-- Floating Button (mobile only) --}}
-        <button onclick="openModal('createModal')"
-            class="md:hidden fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700">
-            +
-        </button>
-
         {{-- Pagination --}}
-        <div class="mt-4">
-            {{ $karyawans->links() }}
+        <div class="mt-5">
+            {{ $karyawans->appends(request()->query())->links() }}
         </div>
     </div>
 
-    {{-- Modal Tambah --}}
-    <div id="createModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-        <div class="bg-white rounded shadow-lg w-full max-w-4xl p-6 max-h-[90vh] overflow-y-auto">
-            <h2 class="text-xl font-bold mb-4">Tambah Karyawan</h2>
+    {{-- 🌿 Modal Tambah Karyawan --}}
+    <div id="createModal" class="hidden fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+        <div
+            class="bg-white rounded-2xl shadow-lg w-full max-w-4xl p-6 max-h-[90vh] overflow-y-auto border border-green-100">
+            <div class="flex justify-between items-center mb-6 border-b pb-3">
+                <h2 class="text-2xl font-bold text-green-700 flex items-center gap-2">
+                    <i class="fi fi-rr-user-add"></i> Tambah Karyawan
+                </h2>
+                <button onclick="closeModal('createModal')"
+                    class="text-gray-500 hover:text-red-500 text-xl">&times;</button>
+            </div>
+
             <form action="{{ route('karyawans.store') }}" method="POST">
                 @csrf
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {{-- Kolom kiri: Data Karyawan --}}
+                    {{-- Kolom kiri --}}
                     <div>
-                        <h3 class="text-lg font-semibold mb-2">Data Karyawan</h3>
-                        <div class="mb-3">
-                            <label class="block">NIP</label>
-                            <input type="text" name="nip" class="w-full border rounded px-3 py-2">
-                        </div>
-                        <div class="mb-3">
-                            <label class="block">Nama Lengkap</label>
-                            <input type="text" name="nama_lengkap" class="w-full border rounded px-3 py-2" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="block">Departemen</label>
-                            <select name="departemen_id" class="w-full border rounded px-3 py-2">
-                                <option value="">-- Pilih Departemen --</option>
-                                @foreach ($departemen as $d)
-                                    <option value="{{ $d->id }}">{{ $d->nama_departemen }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="block">No Telp</label>
-                            <input type="text" name="no_telp" class="w-full border rounded px-3 py-2">
-                        </div>
-                        <div class="mb-3">
-                            <label class="block">Alamat</label>
-                            <textarea name="alamat" class="w-full border rounded px-3 py-2"></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label class="block">Tanggal Masuk</label>
-                            <input type="date" name="tanggal_masuk" class="w-full border rounded px-3 py-2">
+                        <h3 class="text-lg font-semibold text-green-700 mb-3">🧍 Data Karyawan</h3>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">NIP</label>
+                                <input type="text" name="nip"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">Nama Lengkap <span
+                                        class="text-red-500">*</span></label>
+                                <input type="text" name="nama_lengkap" required
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">Departemen</label>
+                                <select name="departemen_id"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none">
+                                    <option value="">-- Pilih Departemen --</option>
+                                    @foreach ($departemen as $d)
+                                        <option value="{{ $d->id }}">{{ $d->nama_departemen }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">No Telp</label>
+                                <input type="text" name="no_telp"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">Alamat</label>
+                                <textarea name="alamat"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">Tanggal Masuk</label>
+                                <input type="date" name="tanggal_masuk"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none">
+                            </div>
                         </div>
                     </div>
 
-                    {{-- Kolom kanan: Data User --}}
+                    {{-- Kolom kanan --}}
                     <div>
-                        <h3 class="text-lg font-semibold mb-2">Akun User</h3>
-                        <div class="mb-3">
-                            <label class="block">Email</label>
-                            <input type="email" name="email" class="w-full border rounded px-3 py-2" required>
+                        <h3 class="text-lg font-semibold text-green-700 mb-3">🔐 Akun User</h3>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">Email <span
+                                        class="text-red-500">*</span></label>
+                                <input type="email" name="email" required
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">Password <span
+                                        class="text-red-500">*</span></label>
+                                <input type="password" name="password" required
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none">
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="block">Password</label>
-                            <input type="password" name="password" class="w-full border rounded px-3 py-2" required>
-                        </div>
-                        {{-- <div class="mb-3">
-                            <label class="block">Role</label>
-                            <select name="role" class="w-full border rounded px-3 py-2">
-                                <option value="karyawan">Karyawan</option>
-                                <option value="admin">Admin</option>
-                            </select>
-                        </div> --}}
                     </div>
                 </div>
 
                 {{-- Tombol --}}
-                <div class="flex justify-end gap-2 mt-6">
+                <div class="flex justify-end gap-3 mt-8">
                     <button type="button" onclick="closeModal('createModal')"
-                        class="px-4 py-2 bg-gray-400 text-white rounded">Batal</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Simpan</button>
+                        class="px-5 py-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100 transition">
+                        Batal
+                    </button>
+                    <button type="submit"
+                        class="px-5 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white shadow-sm transition">
+                        Simpan
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 
 
-
-    {{-- Modal Edit untuk setiap karyawan --}}
+    {{-- 🌿 Modal Edit Karyawan --}}
     @foreach ($karyawans as $karyawan)
         <div id="editModal-{{ $karyawan->id }}"
-            class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-            <div class="bg-white rounded shadow-lg w-full max-w-md p-6">
-                <h2 class="text-xl font-bold mb-4">Edit Karyawan</h2>
+            class="hidden fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+            <div class="bg-white rounded-2xl shadow-lg w-full max-w-md p-6 border border-green-100">
+                <div class="flex justify-between items-center mb-5 border-b pb-2">
+                    <h2 class="text-xl font-bold text-green-700 flex items-center gap-2">
+                        <i class="fi fi-rr-edit"></i> Edit Karyawan
+                    </h2>
+                    <button onclick="closeModal('editModal-{{ $karyawan->id }}')"
+                        class="text-gray-500 hover:text-red-500 text-xl">&times;</button>
+                </div>
+
                 <form action="{{ route('karyawans.update', $karyawan->id) }}" method="POST">
                     @csrf
                     @method('PUT')
-                    <div class="mb-3">
-                        <label class="block">NIP</label>
-                        <input type="text" name="nip" value="{{ $karyawan->nip }}"
-                            class="w-full border rounded px-3 py-2">
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">NIP</label>
+                            <input type="text" name="nip" value="{{ $karyawan->nip }}"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">Nama Lengkap</label>
+                            <input type="text" name="nama_lengkap" value="{{ $karyawan->nama_lengkap }}" required
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">Departemen</label>
+                            <select name="departemen_id"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none">
+                                <option value="">-- Pilih Departemen --</option>
+                                @foreach ($departemen as $d)
+                                    <option value="{{ $d->id }}"
+                                        {{ $d->id == $karyawan->departemen_id ? 'selected' : '' }}>
+                                        {{ $d->nama_departemen }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">No Telp</label>
+                            <input type="text" name="no_telp" value="{{ $karyawan->no_telp }}"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">Alamat</label>
+                            <textarea name="alamat"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none">{{ $karyawan->alamat }}</textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">Tanggal Masuk</label>
+                            <input type="date" name="tanggal_masuk" value="{{ $karyawan->tanggal_masuk }}"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none">
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="block">Nama Lengkap</label>
-                        <input type="text" name="nama_lengkap" value="{{ $karyawan->nama_lengkap }}"
-                            class="w-full border rounded px-3 py-2" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="block">Departemen</label>
-                        <select name="departemen_id" class="w-full border rounded px-3 py-2">
-                            <option value="">-- Pilih Departemen --</option>
-                            @foreach ($departemen as $d)
-                                <option value="{{ $d->id }}"
-                                    {{ $d->id == $karyawan->departemen_id ? 'selected' : '' }}>
-                                    {{ $d->nama_departemen }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="block">No Telp</label>
-                        <input type="text" name="no_telp" value="{{ $karyawan->no_telp }}"
-                            class="w-full border rounded px-3 py-2">
-                    </div>
-                    <div class="mb-3">
-                        <label class="block">Alamat</label>
-                        <textarea name="alamat" class="w-full border rounded px-3 py-2">{{ $karyawan->alamat }}</textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label class="block">Tanggal Masuk</label>
-                        <input type="date" name="tanggal_masuk" value="{{ $karyawan->tanggal_masuk }}"
-                            class="w-full border rounded px-3 py-2">
-                    </div>
-                    <div class="flex justify-end gap-2 mt-4">
+
+                    <div class="flex justify-end gap-3 mt-6">
                         <button type="button" onclick="closeModal('editModal-{{ $karyawan->id }}')"
-                            class="px-4 py-2 bg-gray-400 text-white rounded">Batal</button>
-                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Update</button>
+                            class="px-5 py-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100 transition">
+                            Batal
+                        </button>
+                        <button type="submit"
+                            class="px-5 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white shadow-sm transition">
+                            Update
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
     @endforeach
+
 
     {{-- Script Modal --}}
     <script>

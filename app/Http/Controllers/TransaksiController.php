@@ -18,8 +18,18 @@ class TransaksiController extends Controller
 {
     public function index(Request $request)
     {
+        $query = Transaksi::with(['user', 'departemen', 'details.barang']);
+
+        // Filter status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Pagination entries
         $entries = $request->get('entries', 10);
-        $search = $request->get('search');
+        $transaksi = $query->paginate($entries);
+        // Search
+        $search = $request->get('search', null);
 
         $query = Transaksi::with(['user', 'departemen', 'details.barang']);
 

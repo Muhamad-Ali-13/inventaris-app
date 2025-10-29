@@ -5,25 +5,64 @@
         </h2>
     </x-slot>
 
-    <div class="py-10 bg-gray-50 min-h-screen">
-        <div class="max-w-7xl mx-auto px-6 lg:px-8">
-            <div class="bg-white shadow-md rounded-xl p-6 border border-gray-100">
+    <div class="py-10 bg-gradient-to-br from-gray-50 via-white to-green-50 min-h-screen">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-white shadow-lg rounded-2xl border border-gray-100 p-6">
 
-                <!-- HEADER + BUTTON -->
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-gray-700">Data Barang</h3>
+                <!-- HEADER + TOOLS -->
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-800">📦 Data Barang</h3>
+                        <p class="text-gray-500 text-sm">Kelola dan pantau stok barang secara real-time.</p>
+                    </div>
+
                     @can('role-A')
-                        <button type="button" onclick="tambahBarangModal()"
-                            class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-lg shadow-sm transition">
+                        <button onclick="tambahBarangModal()"
+                            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg shadow transition text-sm font-semibold">
                             + Tambah Barang
                         </button>
                     @endcan
                 </div>
 
+                <!-- FILTERS + SEARCH -->
+                <div x-data="{ search: '', kategori: '' }"
+                    class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <!-- Entries -->
+                        <label class="flex items-center gap-2 text-sm text-gray-700">
+                            Tampilkan
+                            <select id="entries"
+                                class="border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500">
+                                <option>10</option>
+                                <option>25</option>
+                                <option>50</option>
+                                <option>100</option>
+                            </select>
+                            entri
+                        </label>
+
+                        <!-- Filter kategori -->
+                        <select x-model="kategori" id="kategoriFilter"
+                            class="border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500">
+                            <option value="">Semua Kategori</option>
+                            @foreach ($kategori as $k)
+                                <option value="{{ $k->nama_kategori }}">{{ $k->nama_kategori }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Search -->
+                    <div class="relative w-full sm:w-64">
+                        <input x-model="search" type="text" placeholder="Cari nama barang..."
+                            class="w-full border-gray-300 rounded-lg pl-10 text-sm focus:ring-green-500 focus:border-green-500">
+                        <i class="fi fi-rr-search absolute left-3 top-2.5 text-gray-400"></i>
+                    </div>
+                </div>
+
                 <!-- DESKTOP TABLE -->
                 <div class="overflow-x-auto rounded-lg border border-gray-100 hidden md:block">
-                    <table class="w-full text-sm text-left text-gray-600">
-                        <thead class="bg-gray-100 text-gray-700 uppercase text-xs">
+                    <table class="w-full text-sm text-left text-gray-700" id="barangTable">
+                        <thead class="bg-green-100 text-green-800 uppercase text-xs">
                             <tr>
                                 <th class="px-6 py-3">No</th>
                                 <th class="px-6 py-3">Nama Barang</th>
@@ -36,18 +75,20 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @php $no=1; @endphp
+                            @php $no = 1; @endphp
                             @foreach ($barang as $b)
-                                <tr class="border-b hover:bg-gray-50 transition">
+                                <tr class="border-b hover:bg-green-50 transition">
                                     <td class="px-6 py-3">{{ $no++ }}</td>
-                                    <td class="px-6 py-3">{{ $b->nama_barang }}</td>
+                                    <td class="px-6 py-3 font-medium text-gray-800">{{ $b->nama_barang }}</td>
                                     <td class="px-6 py-3">{{ $b->kategori->nama_kategori }}</td>
-                                    <td class="px-6 py-3">{{ $b->stok }}</td>
+                                    <td
+                                        class="px-6 py-3 {{ $b->stok == 0 ? 'text-red-600 font-semibold' : 'text-gray-800' }}">
+                                        {{ $b->stok }}</td>
                                     <td class="px-6 py-3">{{ $b->satuan }}</td>
                                     @can('role-A')
                                         <td class="px-6 py-3 text-center flex justify-center gap-2">
                                             <button type="button"
-                                                class="bg-amber-400 hover:bg-amber-500 text-white p-2.5 rounded-lg shadow-sm"
+                                                class="bg-amber-400 hover:bg-amber-500 text-white p-2.5 rounded-lg"
                                                 onclick="editBarangModal(this)" data-id="{{ $b->id }}"
                                                 data-nama="{{ $b->nama_barang }}" data-kategori="{{ $b->kategori_id }}"
                                                 data-stok="{{ $b->stok }}" data-satuan="{{ $b->satuan }}">
@@ -56,10 +97,9 @@
 
                                             <form action="{{ route('barang.destroy', $b->id) }}" method="POST"
                                                 onsubmit="return confirm('Yakin ingin menghapus data ini?')">
-                                                @csrf
-                                                @method('DELETE')
+                                                @csrf @method('DELETE')
                                                 <button type="submit"
-                                                    class="bg-red-500 hover:bg-red-600 text-white p-2.5 rounded-lg shadow-sm">
+                                                    class="bg-red-500 hover:bg-red-600 text-white p-2.5 rounded-lg">
                                                     <i class="fi fi-sr-trash"></i>
                                                 </button>
                                             </form>
@@ -73,24 +113,21 @@
 
                 <!-- MOBILE CARD VIEW -->
                 <div class="md:hidden space-y-4">
-                    @php $no=1; @endphp
                     @foreach ($barang as $b)
                         <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
                             <div class="flex justify-between items-center mb-2">
                                 <h4 class="font-semibold text-lg text-gray-800">{{ $b->nama_barang }}</h4>
-                                <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded">
+                                <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
                                     {{ $b->kategori->nama_kategori }}
                                 </span>
                             </div>
                             <div class="text-sm text-gray-600 space-y-1">
                                 <p><strong>Stok:</strong>
-                                    <span class="{{ $b->stok == 0 ? 'text-red-500 font-semibold' : 'text-gray-800' }}">
-                                        {{ $b->stok }}
-                                    </span>
+                                    <span
+                                        class="{{ $b->stok == 0 ? 'text-red-500 font-semibold' : 'text-gray-800' }}">{{ $b->stok }}</span>
                                 </p>
                                 <p><strong>Satuan:</strong> {{ $b->satuan }}</p>
                             </div>
-
                             @can('role-A')
                                 <div class="flex gap-2 mt-4">
                                     <button type="button"
@@ -102,8 +139,7 @@
                                     </button>
                                     <form action="{{ route('barang.destroy', $b->id) }}" method="POST"
                                         onsubmit="return confirm('Yakin ingin menghapus data ini?')" class="flex-1">
-                                        @csrf
-                                        @method('DELETE')
+                                        @csrf @method('DELETE')
                                         <button type="submit"
                                             class="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg text-sm font-medium">
                                             <i class="fi fi-sr-trash mr-1"></i> Hapus
@@ -273,5 +309,30 @@
         function barangModalClose() {
             document.getElementById('barangModal').classList.add('hidden');
         }
+
+        // SEARCH & FILTER (client-side)
+        document.addEventListener("DOMContentLoaded", () => {
+            const searchInput = document.querySelector('[x-model="search"]');
+            const kategoriFilter = document.getElementById("kategoriFilter");
+            const table = document.getElementById("barangTable");
+            const rows = table.querySelectorAll("tbody tr");
+
+            function filterTable() {
+                const search = searchInput.value.toLowerCase();
+                const kategori = kategoriFilter.value.toLowerCase();
+
+                rows.forEach(row => {
+                    const nama = row.cells[1].innerText.toLowerCase();
+                    const kat = row.cells[2].innerText.toLowerCase();
+                    row.style.display =
+                        (nama.includes(search) && (kategori === "" || kat === kategori)) ?
+                        "" :
+                        "none";
+                });
+            }
+
+            searchInput.addEventListener("input", filterTable);
+            kategoriFilter.addEventListener("change", filterTable);
+        });
     </script>
 </x-app-layout>

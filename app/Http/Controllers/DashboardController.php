@@ -1,43 +1,75 @@
 <?php
+
 namespace App\Http\Controllers;
-use Illuminate\Http\Request;
 
-// class DashboardController extends Controller
-// {
-//     public function index()
-//     {
-//         $transaksiTerbaru = [];
-//         $totalBarang = \App\Models\Barang::count();
-//         $barangHabis = \App\Models\Barang::where('stok', '<=', 0)->count();
-//         $totalTransaksi = \App\Models\Transaksi::count();
-//         $totalUser = \App\Models\User::count();
+use Illuminate\Support\Facades\Auth;
+use App\Models\Karyawan;
+use App\Models\Barang;
+use App\Models\Transaksi;
+use Carbon\Carbon;
 
-//         // Data grafik per bulan
-//         $dataGrafik = \App\Models\Transaksi::selectRaw('MONTH(created_at) as bulan, COUNT(*) as jumlah')
-//             ->groupBy('bulan')
-//             ->pluck('jumlah', 'bulan');
+class DashboardController extends Controller
+{
+    public function index()
+    {
+        $user = Auth::user();
 
-//         $bulan = [];
-//         $jumlahTransaksi = [];
-//         foreach (range(1, 12) as $i) {
-//             $bulan[] = date('F', mktime(0, 0, 0, $i, 1));
-//             $jumlahTransaksi[] = $dataGrafik[$i] ?? 0;
-//         }
+        // --- Jika role ADMIN ---
+        if ($user->role === 'A') {
+            $jumlahKaryawan = Karyawan::count();
+            $jumlahBarang = Barang::count();
+            $jumlahTransaksi = Transaksi::count();
 
-//         // Transaksi terbaru
-//         $transaksiTerbaru = \App\Models\Transaksi::with('departemen')
-//             ->orderBy('created_at', 'desc')
-//             ->take(5)
-//             ->get();
+            // Label bulan
+            $bulanLabels = collect(range(1, 12))
+                ->map(fn($m) => Carbon::create()->month($m)->translatedFormat('M'));
 
-//         return view('dashboard', compact(
-//             'totalBarang',
-//             'barangHabis',
-//             'totalTransaksi',
-//             'totalUser',
-//             'bulan',
-//             'jumlahTransaksi',
-//             'transaksiTerbaru'
-//         ));
-//     }
-// }
+            // Data grafik
+            $dataPemasukan = [];
+            $dataPengeluaran = [];
+
+            foreach (range(1, 12) as $bulan) {
+                $dataPemasukan[] = Transaksi::where('jenis', 'pemasukan')
+                    ->whereMonth('tanggal_pengajuan', $bulan)
+                    ->count();
+
+                $dataPengeluaran[] = Transaksi::where('jenis', 'pengeluaran')
+                    ->whereMonth('tanggal_pengajuan', $bulan)
+                    ->count();
+            }
+
+            return view('dashboard.admin', compact(
+                'jumlahKaryawan',
+                'jumlahBarang',
+                'jumlahTransaksi',
+                'bulanLabels',
+                'dataPemasukan',
+                'dataPengeluaran'
+            ));
+        }
+
+        // --- Jika role KARYAWAN ---
+        else {
+            $karyawan = Karyawan::where('user_id', $user->id)->first();
+
+            $jumlahTransaksi = Transaksi::where('user_id', $user->id)->count();
+
+            $bulanLabels = collect(range(1, 12))
+                ->map(fn($m) => Carbon::create()->month($m)->translatedFormat('M'));
+
+            $dataTransaksi = [];
+            foreach (range(1, 12) as $bulan) {
+                $dataTransaksi[] = Transaksi::where('user_id', $user->id)
+                    ->whereMonth('tanggal_pengajuan', $bulan)
+                    ->count();
+            }
+
+            return view('dashboard.karyawan', compact(
+                'karyawan',
+                'jumlahTransaksi',
+                'bulanLabels',
+                'dataTransaksi'
+            ));
+        }
+    }
+}
