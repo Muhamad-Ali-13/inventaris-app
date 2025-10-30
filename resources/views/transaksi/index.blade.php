@@ -1,212 +1,262 @@
 <x-app-layout>
-    <div class="container mx-auto mt-8 px-4">
-        <h2 class="text-3xl font-bold text-gray-800 mb-6">💼 Manajemen Transaksi</h2>
 
-        <!-- Filter & Entries -->
-        <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
-            <div class="flex items-center gap-2">
-                <span class="text-gray-700">Show</span>
-                <form method="GET" action="{{ route('transaksi.index') }}">
-                    <select name="entries" onchange="this.form.submit()"
-                        class="border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-green-500">
-                        <option value="5" {{ request('entries') == 5 ? 'selected' : '' }}>5</option>
-                        <option value="10" {{ request('entries') == 10 ? 'selected' : '' }}>10</option>
-                        <option value="25" {{ request('entries') == 25 ? 'selected' : '' }}>25</option>
-                        <option value="50" {{ request('entries') == 50 ? 'selected' : '' }}>50</option>
-                    </select>
-                </form>
-                <span class="text-gray-700">entries</span>
-            </div>
 
-            <!-- Filter Status -->
-            <form method="GET" action="{{ route('transaksi.index') }}" class="flex items-center gap-2">
-                <select name="status" class="border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-green-500">
-                    <option value="">Semua Status</option>
-                    <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Approved</option>
-                    <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Rejected</option>
-                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                </select>
-                <button type="submit"
-                    class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow transition">
-                    Filter
-                </button>
-            </form>
+    <div class="py-10 bg-gradient-to-br from-gray-50 via-white to-green-50 min-h-screen">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-white shadow-lg rounded-2xl border border-gray-100 p-6">
 
-            <!-- Tombol Tambah -->
-            <button onclick="openModal('createModal')"
-                class="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg shadow-md transition duration-200">
-                + Tambah Transaksi
-            </button>
-        </div>
+                <!-- HEADER + TOOLS -->
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-800">💼 Data Transaksi</h3>
+                        <p class="text-gray-500 text-sm">Kelola dan pantau transaksi masuk & keluar secara real-time.</p>
+                    </div>
 
-        <!-- DESKTOP TABLE -->
-        <div class="hidden md:block bg-white shadow-lg rounded-xl overflow-hidden border border-gray-100">
-            <table class="min-w-full text-sm">
-                <thead class="bg-green-600 text-white">
-                    <tr>
-                        <th class="px-4 py-2 text-left">No</th>
-                        <th class="px-4 py-2 text-left">Nama</th>
-                        <th class="px-4 py-2 text-left">Departemen</th>
-                        <th class="px-4 py-2 text-left">Jenis</th>
-                        <th class="px-4 py-2 text-left">Status</th>
-                        <th class="px-4 py-2 text-left">Tanggal Pengajuan</th>
-                        <th class="px-4 py-2 text-left">Tanggal Disetujui</th>
-                        <th class="px-4 py-2 text-left">Barang</th>
-                        @if (auth()->user()->role === 'A')
-                            <th class="px-4 py-2 text-center">Aksi</th>
-                        @endif
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($transaksi as $i => $trx)
-                        <tr class="border-b hover:bg-green-50 transition">
-                            <td class="px-4 py-2">{{ $i + $transaksi->firstItem() }}</td>
-                            <td class="px-4 py-2">{{ $trx->user->name ?? '-' }}</td>
-                            <td class="px-4 py-2">{{ $trx->departemen->nama_departemen ?? '-' }}</td>
-                            <td class="px-4 py-2">
+                    @can('role-A')
+                        <button onclick="openModal('createModal')"
+                            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg shadow transition text-sm font-semibold">
+                            + Tambah Transaksi
+                        </button>
+                    @endcan
+                </div>
+
+                <!-- FILTERS + SEARCH + ENTRIES -->
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <label class="flex items-center gap-2 text-sm text-gray-700">
+                            Tampilkan
+                            <select id="entries"
+                                class="border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500">
+                                <option value="5" {{ request('entries') == 5 ? 'selected' : '' }}>5</option>
+                                <option value="10" {{ request('entries') == 10 ? 'selected' : '' }}>10</option>
+                                <option value="25" {{ request('entries') == 25 ? 'selected' : '' }}>25</option>
+                                <option value="50" {{ request('entries') == 50 ? 'selected' : '' }}>50</option>
+                            </select>
+                            entri
+                        </label>
+
+                        <!-- Filter Status -->
+                        <select id="statusFilter"
+                            class="border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500">
+                            <option value="">Semua Status</option>
+                            <option value="approved">Approved</option>
+                            <option value="rejected">Rejected</option>
+                            <option value="pending">Pending</option>
+                        </select>
+                    </div>
+
+                    <!-- Search -->
+                    <div class="relative w-full sm:w-64">
+                        <input type="text" id="searchInput" placeholder="Cari nama user..."
+                            class="w-full border border-gray-300 rounded-lg pl-10 text-sm focus:ring-green-500 focus:border-green-500">
+                        <i class="fi fi-rr-search absolute left-3 top-2.5 text-gray-400"></i>
+                    </div>
+                </div>
+
+                <!-- DESKTOP TABLE -->
+                <div class="overflow-x-auto rounded-lg border border-gray-100 hidden md:block">
+                    <table class="w-full text-sm text-left text-gray-700" id="transaksiTable">
+                        <thead class="bg-green-100 text-green-800 uppercase text-xs">
+                            <tr>
+                                <th class="px-6 py-3">No</th>
+                                <th class="px-6 py-3">Nama</th>
+                                <th class="px-6 py-3">Departemen</th>
+                                <th class="px-6 py-3">Jenis</th>
+                                <th class="px-6 py-3">Status</th>
+                                <th class="px-6 py-3">Tanggal Pengajuan</th>
+                                <th class="px-6 py-3">Tanggal Disetujui</th>
+                                <th class="px-6 py-3">Barang</th>
+                                @can('role-A')
+                                    <th class="px-6 py-3 text-center">Aksi</th>
+                                @endcan
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($transaksi as $index => $trx)
+                                <tr class="border-b hover:bg-green-50 transition">
+                                    <td class="px-6 py-3">{{ $index + 1 }}</td>
+                                    <td class="px-6 py-3 font-medium text-gray-800">{{ $trx->user->name ?? '-' }}</td>
+                                    <td class="px-6 py-3">{{ $trx->departemen->nama_departemen ?? '-' }}</td>
+                                    <td class="px-6 py-3">
+                                        <span
+                                            class="px-2 py-1 text-xs font-semibold rounded-full {{ $trx->jenis === 'pemasukan' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
+                                            {{ ucfirst($trx->jenis) }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-3">
+                                        <span
+                                            class="px-2 py-1 text-xs font-semibold rounded-full
+                                            @if ($trx->status == 'approved') bg-green-100 text-green-700
+                                            @elseif($trx->status == 'rejected') bg-red-100 text-red-700
+                                            @else bg-yellow-100 text-yellow-700 @endif">
+                                            {{ ucfirst($trx->status) }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-3">{{ $trx->tanggal_pengajuan }}</td>
+                                    <td class="px-6 py-3">{{ $trx->tanggal_approval ?? '-' }}</td>
+                                    <td class="px-6 py-3">
+                                        @foreach ($trx->details as $d)
+                                            <div class="text-gray-700">{{ $d->barang->nama_barang }}
+                                                ({{ $d->jumlah }})
+                                            </div>
+                                        @endforeach
+                                    </td>
+                                    @can('role-A')
+                                        <td class="px-4 py-2 text-center space-x-1">
+                                            @if ($trx->status == 'pending')
+                                                <form action="{{ route('transaksi.approve', $trx->id) }}" method="POST"
+                                                    class="inline"> @csrf <button type="submit"
+                                                        class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs">
+                                                        Approve </button> </form>
+                                                <form action="{{ route('transaksi.reject', $trx->id) }}" method="POST"
+                                                    class="inline"> @csrf <button type="submit"
+                                                        class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs">
+                                                        Reject </button> </form>
+                                                @endif @if ($trx->status !== 'approved')
+                                                    <button onclick="openModal('editModal{{ $trx->id }}')"
+                                                        class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-xs">
+                                                        Edit </button>
+                                                @else
+                                                    <button
+                                                        class="bg-gray-300 text-gray-500 px-3 py-1 rounded text-xs cursor-not-allowed"
+                                                        disabled>Edit</button>
+                                                @endif
+                                                <form action="{{ route('transaksi.destroy', $trx->id) }}" method="POST"
+                                                    onsubmit="return confirm('Yakin hapus transaksi ini?')" class="inline">
+                                                    @csrf @method('DELETE') <button
+                                                        class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs">Hapus</button>
+                                                </form>
+                                        </td>
+                                    @endcan
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- MOBILE CARD VIEW -->
+                <div class="md:hidden space-y-4" id="transaksiCards">
+                    @foreach ($transaksi as $trx)
+                        <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <h4 class="font-semibold text-lg text-gray-800">{{ $trx->user->name ?? '-' }}</h4>
                                 <span
-                                    class="px-2 py-1 text-xs font-semibold rounded-full {{ $trx->jenis === 'pemasukan' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
+                                    class="text-xs px-2 py-1 rounded-full {{ $trx->jenis === 'pemasukan' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
                                     {{ ucfirst($trx->jenis) }}
                                 </span>
-                            </td>
-                            <td class="px-4 py-2">
-                                <span
-                                    class="px-2 py-1 text-xs font-semibold rounded-full
-                                @if ($trx->status == 'approved') bg-green-100 text-green-700
-                                @elseif($trx->status == 'rejected') bg-red-100 text-red-700
-                                @else bg-yellow-100 text-yellow-700 @endif">
-                                    {{ ucfirst($trx->status) }}
-                                </span>
-                            </td>
-                            <td class="px-4 py-2">{{ $trx->tanggal_pengajuan }}</td>
-                            <td class="px-4 py-2">{{ $trx->tanggal_approval ?? '-' }}</td>
-                            <td class="px-4 py-2">
-                                @foreach ($trx->details as $d)
-                                    <div class="text-gray-700">{{ $d->barang->nama_barang }} ({{ $d->jumlah }})
-                                    </div>
-                                @endforeach
-                            </td>
-
-                            @if (auth()->user()->role === 'A')
-                                <td class="px-4 py-2 text-center space-x-1">
-                                    @if ($trx->status == 'pending')
-                                        <form action="{{ route('transaksi.approve', $trx->id) }}" method="POST"
-                                            class="inline">
-                                            @csrf
-                                            <button type="submit"
-                                                class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs">
-                                                Approve
-                                            </button>
-                                        </form>
-                                        <form action="{{ route('transaksi.reject', $trx->id) }}" method="POST"
-                                            class="inline">
-                                            @csrf
-                                            <button type="submit"
-                                                class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs">
-                                                Reject
-                                            </button>
-                                        </form>
-                                    @endif
-
-                                    @if ($trx->status !== 'approved')
+                            </div>
+                            <div class="text-sm text-gray-600 space-y-1">
+                                <p><strong>Departemen:</strong> {{ $trx->departemen->nama_departemen ?? '-' }}</p>
+                                <p><strong>Status:</strong>
+                                    <span
+                                        class="px-2 py-1 text-xs font-semibold rounded-full
+                                        @if ($trx->status == 'approved') bg-green-100 text-green-700
+                                        @elseif($trx->status == 'rejected') bg-red-100 text-red-700
+                                        @else bg-yellow-100 text-yellow-700 @endif">
+                                        {{ ucfirst($trx->status) }}
+                                    </span>
+                                </p>
+                                <p><strong>Tanggal Pengajuan:</strong> {{ $trx->tanggal_pengajuan }}</p>
+                                <p><strong>Tanggal Disetujui:</strong> {{ $trx->tanggal_approval ?? '-' }}</p>
+                                <p><strong>Barang:</strong>
+                                    @foreach ($trx->details as $d)
+                                        <div>{{ $d->barang->nama_barang }} ({{ $d->jumlah }})</div>
+                                    @endforeach
+                                </p>
+                                @can('role-A')
+                                    <div class="flex justify-end space-x-1">
                                         <button onclick="openModal('editModal{{ $trx->id }}')"
                                             class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-xs">
-                                            Edit
-                                        </button>
-                                    @else
-                                        <button
-                                            class="bg-gray-300 text-gray-500 px-3 py-1 rounded text-xs cursor-not-allowed"
-                                            disabled>Edit</button>
-                                    @endif
+                                            Edit </button>
+                                        <form action="{{ route('transaksi.destroy', $trx->id) }}" method="POST"
+                                            onsubmit="return confirm('Yakin hapus transaksi ini?')" class="inline">
+                                            @csrf @method('DELETE') <button
+                                                class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs">Hapus</button>
+                                        </form>
+                                    </div>
+                                @endcan
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
 
-                                    <form action="{{ route('transaksi.destroy', $trx->id) }}" method="POST"
-                                        onsubmit="return confirm('Yakin hapus transaksi ini?')" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button
-                                            class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs">Hapus</button>
-                                    </form>
-                                </td>
-                            @endif
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="9" class="text-center py-4 text-gray-500">Belum ada transaksi</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Pagination -->
-        <div class="mt-6">
-            {{ $transaksi->links() }}
+            </div>
         </div>
     </div>
-
-
 
     <!-- Modal Tambah -->
     <div id="createModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 overflow-y-auto max-h-[90vh]">
-            <form action="{{ route('transaksi.store') }}" method="POST">
-                @csrf
-                <h3 class="text-xl font-bold mb-4">Tambah Transaksi</h3>
+            <form action="{{ route('transaksi.store') }}" method="POST"> @csrf <h3 class="text-xl font-bold mb-4">
+                    Tambah Transaksi</h3>
                 <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block mb-1">Jenis</label>
-                        <select name="jenis" class="w-full border rounded p-2" required>
-                            <option value="-">-</option>
-                            @can('role-A')
+                    <div> <label class="block mb-1">Jenis</label> <select name="jenis"
+                            class="w-full border rounded p-2" required>
+                            <option value="-">-</option> @can('role-A')
                                 <option value="pemasukan">Pemasukan</option>
-                            @endcan
-                            <option value="pengeluaran">Pengeluaran</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block mb-1">Tanggal Pengajuan</label>
-                        <input type="date" name="tanggal_pengajuan" class="w-full border rounded p-2" required>
-                    </div>
-                </div>
-
-                <!-- Kategori -->
-                <div class="mt-4">
-                    <label class="block mb-2">Kategori</label>
-                    <select id="kategoriSelect" class="border rounded p-2 w-full">
+                            @endcan <option value="pengeluaran">Pengeluaran</option>
+                        </select> </div>
+                    <div> <label class="block mb-1">Tanggal Pengajuan</label> <input type="date"
+                            name="tanggal_pengajuan" class="w-full border rounded p-2" required> </div>
+                </div> <!-- Kategori -->
+                <div class="mt-4"> <label class="block mb-2">Kategori</label> <select id="kategoriSelect"
+                        class="border rounded p-2 w-full">
                         <option value="">-- Pilih Kategori --</option>
                         @foreach ($kategori as $k)
                             <option value="{{ $k->id }}">{{ $k->nama_kategori }}</option>
                         @endforeach
-                    </select>
-                </div>
-
-                <!-- Barang -->
-                <div class="mt-4 hidden" id="barangSection">
-                    <label class="block mb-2">Barang</label>
+                    </select> </div> <!-- Barang -->
+                <div class="mt-4 hidden" id="barangSection"> <label class="block mb-2">Barang</label>
                     <div id="barang-wrapper">
-                        <div class="flex gap-2 mb-2 items-center">
-                            <select name="barang_id[]" id="barangSelect" class="border rounded p-2 flex-1" required>
+                        <div class="flex gap-2 mb-2 items-center"> <select name="barang_id[]" id="barangSelect"
+                                class="border rounded p-2 flex-1" required>
                                 <option value="">-- Pilih Barang --</option>
-                            </select>
-                            <input type="number" name="barang_jumlah[]" class="border rounded p-2 w-24"
-                                placeholder="Jumlah" required>
-                            <button type="button"
-                                class="bg-green-600 text-white px-3 py-1 rounded add-barang">+</button>
-                            <button type="button"
-                                class="bg-red-600 text-white px-3 py-1 rounded remove-barang">−</button>
-                        </div>
+                            </select> <input type="number" name="barang_jumlah[]" class="border rounded p-2 w-24"
+                                placeholder="Jumlah" required> <button type="button"
+                                class="bg-green-600 text-white px-3 py-1 rounded add-barang">+</button> <button
+                                type="button"
+                                class="bg-red-600 text-white px-3 py-1 rounded remove-barang">−</button> </div>
                     </div>
                 </div>
-
-                <div class="mt-6 flex justify-end gap-2">
-                    <button type="button" class="px-4 py-2 border rounded"
-                        onclick="closeModal('createModal')">Batal</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Tambah</button>
-                </div>
+                <div class="mt-6 flex justify-end gap-2"> <button type="button" class="px-4 py-2 border rounded"
+                        onclick="closeModal('createModal')">Batal</button> <button type="submit"
+                        class="px-4 py-2 bg-blue-600 text-white rounded">Tambah</button> </div>
             </form>
         </div>
     </div>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const searchInput = document.getElementById("searchInput");
+            const statusFilter = document.getElementById("statusFilter");
+            const entriesSelect = document.getElementById("entries");
+            const table = document.getElementById("transaksiTable");
+            const rows = Array.from(table.querySelectorAll("tbody tr"));
+
+            function filterTable() {
+                const search = searchInput.value.toLowerCase();
+                const status = statusFilter.value.toLowerCase();
+                const limit = parseInt(entriesSelect.value);
+
+                let count = 0;
+                rows.forEach(row => {
+                    const nama = row.cells[1].innerText.toLowerCase();
+                    const st = row.cells[4].innerText.toLowerCase();
+                    if (nama.includes(search) && (status === "" || st === status) && count < limit) {
+                        row.style.display = "";
+                        count++;
+                    } else {
+                        row.style.display = "none";
+                    }
+                });
+            }
+
+            searchInput.addEventListener("input", filterTable);
+            statusFilter.addEventListener("change", filterTable);
+            entriesSelect.addEventListener("change", filterTable);
+            filterTable();
+        });
+    </script>
     <script>
         function openModal(id) {
             document.getElementById(id).classList.remove('hidden');
@@ -321,10 +371,19 @@
                         .stok) : null;
                     const jumlahInputValue = parseInt(jumlahInput.value);
 
-                    if (stokTersedia !== null && jumlahInputValue > stokTersedia) {
+                    // Ambil jenis transaksi dari kategori (pemasukan atau pengeluaran)
+                    const kategoriSelect = document.getElementById('kategoriSelect');
+                    const kategoriText = kategoriSelect?.options[kategoriSelect.selectedIndex]?.text
+                        ?.toLowerCase();
+                    const isPemasukan = kategoriText?.includes('masuk'); // true jika "pemasukan"
+
+                    // 🔹 Jika pengeluaran, lakukan validasi stok
+                    if (!isPemasukan && stokTersedia !== null && jumlahInputValue > stokTersedia) {
                         jumlahInput.value = stokTersedia;
                         alert(`⚠️ Jumlah melebihi stok tersedia (${stokTersedia}).`);
                     }
+
+                    // 🔹 Jika pemasukan, tidak ada batas stok (boleh menambah meskipun stok 0)
                 }
             });
 

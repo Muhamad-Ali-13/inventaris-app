@@ -133,6 +133,7 @@
             <tr>
                 <th style="width: 4%">No</th>
                 <th style="width: 15%">Tanggal Disetujui</th>
+                <th style="width: 20%">Nama</th>
                 <th style="width: 20%">Departemen</th>
                 <th>Barang & Jumlah</th>
                 <th style="width: 12%">Status</th>
@@ -145,6 +146,7 @@
                     <td style="text-align:center">
                         {{ $trx->tanggal_approval ? \Carbon\Carbon::parse($trx->tanggal_approval)->format('d-m-Y') : '-' }}
                     </td>
+                    <td>{{ $trx->user->name ?? 'ADMIN' }}</td>
                     <td style="text-align:center">{{ $trx->departemen->nama_departemen ?? '-' }}</td>
                     <td>
                         @if ($trx->details->count() > 0)
