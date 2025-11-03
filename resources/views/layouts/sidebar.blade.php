@@ -1,13 +1,12 @@
-<div x-data="{ openSidebar: false, showContent: false }"
-    x-init="setTimeout(() => showContent = true, 100)"
-    class="flex h-screen bg-white text-green-700">
+<div x-data="{ openSidebar: false, showContent: false }" x-init="setTimeout(() => showContent = true, 100)" class="flex h-screen bg-white text-green-700">
 
     <!-- SIDEBAR -->
     <aside :class="openSidebar ? 'translate-x-0' : '-translate-x-full md:translate-x-0'"
         class="fixed md:static top-0 left-0 w-64 h-full flex flex-col bg-white border-r border-green-200 shadow-xl transform transition-all duration-300 ease-in-out z-50">
 
         <!-- Logo -->
-        <div class="h-16 flex items-center justify-center border-b border-green-200 bg-gradient-to-r from-green-50 to-white shadow-sm">
+        <div
+            class="h-16 flex items-center justify-center border-b border-green-200 bg-gradient-to-r from-green-50 to-white shadow-sm">
             <a href="{{ route('dashboard') }}" class="flex items-center gap-2 transition-transform hover:scale-105">
                 <x-application-logo class="block h-9 w-auto text-green-700" />
                 <span class="font-extrabold text-lg tracking-wide text-green-700">SIAJM</span>
@@ -26,6 +25,7 @@
 
         <!-- Navigation -->
         <nav class="flex-1 overflow-y-auto px-4 py-5 space-y-1">
+            <!-- Dashboard -->
             <a href="{{ route('dashboard') }}"
                 class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200
                 {{ request()->routeIs('dashboard') ? 'bg-green-100 font-semibold text-green-800 shadow-inner ring-2 ring-green-300' : 'hover:bg-green-50 hover:translate-x-1' }}">
@@ -35,45 +35,79 @@
 
             @can('role-A')
                 <a href="{{ route('karyawans.index') }}"
-                    class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200
-                    {{ request()->routeIs('karyawans.index') ? 'bg-green-100 font-semibold text-green-800 shadow-inner ring-2 ring-green-300' : 'hover:bg-green-50 hover:translate-x-1' }}">
-                    <i class="fi fi-rr-people"></i>
-                    <span>Data Karyawan</span>
-                </a>
+                    class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 {{ request()->routeIs('karyawans.index') ? 'bg-green-100 font-semibold text-green-800 shadow-inner ring-2 ring-green-300' : 'hover:bg-green-50 hover:translate-x-1' }}">
+                    <i class="fi fi-rr-people"></i> <span>Data Karyawan</span> </a>
+                <!-- DROPDOWN: MASTER DATA -->
+                <div x-data="{ openMaster: {{ request()->routeIs('departemen.index', 'kategori.index', 'barang.index') ? 'true' : 'false' }} }">
+                    <button @click="openMaster = !openMaster"
+                        class="w-full flex items-center justify-between px-3 py-2 rounded-lg transition-all duration-200 hover:bg-green-50">
+                        <div class="flex items-center gap-3">
+                            <i class="fi fi-rr-database"></i>
+                            <span>Master Data</span>
+                        </div>
+                        <i :class="openMaster ? 'fi fi-rr-angle-small-up' : 'fi fi-rr-angle-small-down'"></i>
+                    </button>
 
-                <a href="{{ route('departemen.index') }}"
-                    class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200
-                    {{ request()->routeIs('departemen.index') ? 'bg-green-100 font-semibold text-green-800 shadow-inner ring-2 ring-green-300' : 'hover:bg-green-50 hover:translate-x-1' }}">
-                    <i class="fi fi-rr-building"></i>
-                    <span>Departemen</span>
-                </a>
+                    <div x-show="openMaster" x-transition class="pl-8 space-y-1 mt-1">
+                        <a href="{{ route('departemen.index') }}"
+                            class="flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-all duration-200
+            {{ request()->routeIs('departemen.index') ? 'bg-green-100 font-semibold text-green-800 ring-1 ring-green-300' : 'hover:bg-green-50' }}">
+                            <i class="fi fi-rr-building"></i>
+                            <span>Departemen</span>
+                        </a>
 
-                <a href="{{ route('kategori.index') }}"
-                    class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200
-                    {{ request()->routeIs('kategori.index') ? 'bg-green-100 font-semibold text-green-800 shadow-inner ring-2 ring-green-300' : 'hover:bg-green-50 hover:translate-x-1' }}">
-                    <i class="fi fi-rr-layers"></i>
-                    <span>Kategori</span>
-                </a>
+                        <a href="{{ route('kategori.index') }}"
+                            class="flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-all duration-200
+            {{ request()->routeIs('kategori.index') ? 'bg-green-100 font-semibold text-green-800 ring-1 ring-green-300' : 'hover:bg-green-50' }}">
+                            <i class="fi fi-rr-layers"></i>
+                            <span>Kategori</span>
+                        </a>
+
+                        <a href="{{ route('barang.index') }}"
+                            class="flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-all duration-200
+            {{ request()->routeIs('barang.index') ? 'bg-green-100 font-semibold text-green-800 ring-1 ring-green-300' : 'hover:bg-green-50' }}">
+                            <i class="fi fi-rr-box"></i>
+                            <span>Barang</span>
+                        </a>
+                    </div>
+                </div>
             @endcan
 
-            <a href="{{ route('barang.index') }}"
-                class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200
-                {{ request()->routeIs('barang.index') ? 'bg-green-100 font-semibold text-green-800 shadow-inner ring-2 ring-green-300' : 'hover:bg-green-50 hover:translate-x-1' }}">
-                <i class="fi fi-rr-box"></i>
-                <span>Barang</span>
-            </a>
+            <!-- DROPDOWN: TRANSAKSI -->
+            <div x-data="{ openTransaksi: {{ request()->routeIs('pemasukan.index', 'pengeluaran.index') ? 'true' : 'false' }} }">
+                <button @click="openTransaksi = !openTransaksi"
+                    class="w-full flex items-center justify-between px-3 py-2 rounded-lg transition-all duration-200 hover:bg-green-50">
+                    <div class="flex items-center gap-3">
+                        <i class="fi fi-rr-exchange"></i>
+                        <span>Transaksi</span>
+                    </div>
+                    <i :class="openTransaksi ? 'fi fi-rr-angle-small-up' : 'fi fi-rr-angle-small-down'"></i>
+                </button>
 
-            <a href="{{ route('transaksi.index') }}"
-                class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200
-                {{ request()->routeIs('transaksi.index') ? 'bg-green-100 font-semibold text-green-800 shadow-inner ring-2 ring-green-300' : 'hover:bg-green-50 hover:translate-x-1' }}">
-                <i class="fi fi-rr-exchange"></i>
-                <span>Transaksi</span>
-            </a>
+                <div x-show="openTransaksi" x-transition class="pl-8 space-y-1 mt-1">
+                    @can('role-A')
+                    <a href="{{ route('pemasukan.index') }}"
+                        class="flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-all duration-200
+            {{ request()->routeIs('pemasukan.index') ? 'bg-green-100 font-semibold text-green-800 ring-1 ring-green-300' : 'hover:bg-green-50' }}">
+                        <i class="fi fi-rr-arrow-trend-up"></i>
+                        <span>Pemasukan</span>
+                    </a>
+                    @endcan
+
+                    <a href="{{ route('pengeluaran.index') }}"
+                        class="flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-all duration-200
+            {{ request()->routeIs('pengeluaran.index') ? 'bg-green-100 font-semibold text-green-800 ring-1 ring-green-300' : 'hover:bg-green-50' }}">
+                        <i class="fi fi-rr-arrow-trend-down"></i>
+                        <span>Pengeluaran</span>
+                    </a>
+                </div>
+            </div>
 
             @can('role-A')
+                <!-- Laporan -->
                 <a href="{{ route('laporan.index') }}"
                     class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200
-                    {{ request()->routeIs('laporan.index') ? 'bg-green-100 font-semibold text-green-800 shadow-inner ring-2 ring-green-300' : 'hover:bg-green-50 hover:translate-x-1' }}">
+                {{ request()->routeIs('laporan.index') ? 'bg-green-100 font-semibold text-green-800 shadow-inner ring-2 ring-green-300' : 'hover:bg-green-50 hover:translate-x-1' }}">
                     <i class="fi fi-rr-document"></i>
                     <span>Laporan</span>
                 </a>
@@ -110,7 +144,8 @@
 
             <!-- Kanan: Profile -->
             <div x-data="{ open: false }" class="relative flex items-center gap-3">
-                <button @click="open = !open" class="flex items-center gap-2 focus:outline-none transition-all hover:scale-105">
+                <button @click="open = !open"
+                    class="flex items-center gap-2 focus:outline-none transition-all hover:scale-105">
                     <span class="hidden sm:block text-green-800 text-sm sm:text-base font-medium">
                         {{ Auth::user()->name }}
                     </span>
@@ -120,8 +155,7 @@
                 </button>
 
                 <!-- Dropdown -->
-                <div x-show="open" @click.away="open = false"
-                    x-transition:enter="transition ease-out duration-200"
+                <div x-show="open" @click.away="open = false" x-transition:enter="transition ease-out duration-200"
                     x-transition:enter-start="opacity-0 translate-y-1"
                     x-transition:enter-end="opacity-100 translate-y-0"
                     x-transition:leave="transition ease-in duration-150"
@@ -147,11 +181,9 @@
             </div>
         </header>
 
-        <!-- PAGE CONTENT (Animated) -->
-        <main x-show="showContent"
-            x-transition:enter="transition ease-out duration-500"
-            x-transition:enter-start="opacity-0 translate-y-4"
-            x-transition:enter-end="opacity-100 translate-y-0"
+        <!-- PAGE CONTENT -->
+        <main x-show="showContent" x-transition:enter="transition ease-out duration-500"
+            x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0"
             class="flex-1 p-6 overflow-y-auto bg-white text-green-700">
             {{ $slot }}
         </main>

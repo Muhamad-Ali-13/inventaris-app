@@ -124,7 +124,8 @@
         <div class="relative bg-white rounded-xl shadow-lg w-full max-w-md mx-5 p-6 border border-green-200">
             <div class="flex items-center justify-between border-b pb-3 mb-4">
                 <h3 class="text-lg font-semibold text-gray-800">Tambah Departemen</h3>
-                <button onclick="closeModal('departemenCreateModal')" class="text-gray-500 hover:text-gray-800 text-xl">&times;</button>
+                <button onclick="closeModal('departemenCreateModal')"
+                    class="text-gray-500 hover:text-gray-800 text-xl">&times;</button>
             </div>
             <form action="{{ route('departemen.store') }}" method="POST">
                 @csrf
@@ -153,40 +154,139 @@
         const openModal = (id) => document.getElementById(id).classList.remove('hidden');
         const closeModal = (id) => document.getElementById(id).classList.add('hidden');
 
-        // EDIT DEPARTEMEN
         function editDepartemenModal(button) {
             const id = button.dataset.id;
             const nama = button.dataset.nama ?? '';
             const url = "{{ route('departemen.update', ':id') }}".replace(':id', id);
 
+            // Ambil token CSRF dari meta (fallback jika tidak ada)
+            const meta = document.querySelector('meta[name="csrf-token"]');
+            const token = meta ? meta.getAttribute('content') : '';
+
+            // Buat HTML modal dynamic
             const html = `
-            <div id="departemenModal" class="fixed inset-0 flex items-center justify-center z-50">
-                <div class="fixed inset-0 bg-black bg-opacity-40" onclick="closeModal('departemenModal')"></div>
-                <div class="relative bg-white rounded-xl shadow-lg w-full max-w-md mx-5 p-6 border border-green-200">
-                    <div class="flex items-center justify-between border-b pb-3 mb-4">
-                        <h3 class="text-lg font-semibold text-gray-800">Edit Departemen</h3>
-                        <button onclick="closeModal('departemenModal')" class="text-gray-500 hover:text-gray-800 text-xl">&times;</button>
-                    </div>
-                    <form method="POST" action="${url}">
-                        @csrf
-                        <input type="hidden" name="_method" value="PATCH">
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Departemen</label>
-                            <input type="text" name="nama_departemen" value="${nama}" 
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-800 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
-                                required>
-                        </div>
-                        <div class="flex justify-end gap-2 mt-4">
-                            <button type="button" onclick="closeModal('departemenModal')" 
-                                class="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition">Batal</button>
-                            <button type="submit" 
-                                class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">Simpan</button>
-                        </div>
-                    </form>
-                </div>
-            </div>`;
-            
+<div id="departemenModal" class="fixed inset-0 flex items-center justify-center z-50">
+    <div class="fixed inset-0 bg-black bg-opacity-40" onclick="closeModal('departemenModal')"></div>
+    <div class="relative bg-white rounded-xl shadow-lg w-full max-w-md mx-5 p-6 border border-green-200">
+        <div class="flex items-center justify-between border-b pb-3 mb-4">
+            <h3 class="text-lg font-semibold text-gray-800">Edit Departemen</h3>
+            <button onclick="closeModal('departemenModal')" class="text-gray-500 hover:text-gray-800 text-xl">&times;</button>
+        </div>
+
+        <form id="formEditDepartemen">
+            <input type="hidden" name="_token" value="${token}">
+            <input type="hidden" name="_method" value="PATCH">
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Departemen</label>
+                <input type="text" name="nama_departemen" value="${escapeHtml(nama)}"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-800 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+                    required>
+                <p id="editErrors" class="mt-2 text-sm text-red-600 hidden"></p>
+            </div>
+            <div class="flex justify-end gap-2 mt-4">
+                <button type="button" onclick="closeModal('departemenModal')"
+                    class="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition">Batal</button>
+                <button type="submit"
+                    class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>`;
+
             document.getElementById('departemenModalContainer').innerHTML = html;
+
+            // Utility: escape string untuk value input (prevent breaking HTML)
+            function escapeHtml(unsafe) {
+                return ('' + unsafe)
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            }
+
+            // Setelah form dimasukkan ke DOM, pasang event listener
+            const form = document.getElementById('formEditDepartemen');
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const formData = new FormData(form);
+                // Pastikan method PATCH dikirim (safeguard)
+                formData.set('_method', 'PATCH');
+
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST', // menggunakan POST + _method=PATCH
+                        headers: {
+                            'X-CSRF-TOKEN': token,
+                            'X-Requested-With': 'XMLHttpRequest', // supaya Laravel deteksi ajax
+                            'Accept': 'application/json'
+                        },
+                        body: formData
+                    });
+
+                    // Jika response JSON
+                    const contentType = response.headers.get('content-type') || '';
+                    if (contentType.includes('application/json')) {
+                        const data = await response.json();
+
+                        if (response.ok && data.success) {
+                            // Update tampilan tabel (desktop)
+                            const editBtn = document.querySelector(`button[data-id='${id}']`);
+                            if (editBtn) {
+                                // Jika desktop, cari row tr terdekat
+                                const row = editBtn.closest('tr');
+                                if (row) {
+                                    row.querySelector('td:nth-child(2)').textContent = data.nama_departemen;
+                                }
+                                // Update atribut data-nama agar modal berikutnya berisi nama yang benar
+                                editBtn.setAttribute('data-nama', data.nama_departemen);
+                            }
+
+                            // Update mobile card (jika ada)
+                            const cardButtons = Array.from(document.querySelectorAll(
+                                `#departemenCards [data-id='${id}']`));
+                            cardButtons.forEach(btn => {
+                                const card = btn.closest('div'); // kartu terdekat
+                                if (card) {
+                                    const title = card.querySelector('h4');
+                                    if (title) title.textContent = data.nama_departemen;
+                                }
+                                btn.setAttribute('data-nama', data.nama_departemen);
+                            });
+
+                            // Tutup modal dan bersihkan container
+                            closeModal('departemenModal');
+                            // Hapus HTML modal setelah animasi (opsional): langsung kosongkan
+                            document.getElementById('departemenModalContainer').innerHTML = '';
+                        } else {
+                            // Menampilkan pesan error validasi jika ada
+                            const errEl = document.getElementById('editErrors');
+                            errEl.classList.remove('hidden');
+                            if (data.errors) {
+                                // gabungkan pesan validasi
+                                const messages = [];
+                                for (const k in data.errors) {
+                                    messages.push(...data.errors[k]);
+                                }
+                                errEl.textContent = messages.join(' • ');
+                            } else if (data.message) {
+                                errEl.textContent = data.message;
+                            } else {
+                                errEl.textContent = 'Gagal memperbarui data.';
+                            }
+                        }
+                    } else {
+                        // Jika server mengembalikan redirect/HTML (misal validasi gagal tanpa JSON)
+                        const text = await response.text();
+                        console.error('Unexpected non-JSON response:', text);
+                        alert('Gagal memperbarui data. Periksa input atau lihat console untuk detail.');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('Terjadi kesalahan saat mengirim data. Coba lagi.');
+                }
+            });
         }
 
         // SEARCH & ENTRIES (desktop & mobile)
@@ -194,20 +294,20 @@
             const searchInput = document.getElementById('searchInput');
             const entriesSelect = document.getElementById('entries');
             const table = document.getElementById('departemenTable');
-            const tbody = table.querySelector('tbody');
-            const rows = Array.from(tbody.getElementsByTagName('tr'));
+            const tbody = table ? table.querySelector('tbody') : null;
+            const rows = tbody ? Array.from(tbody.getElementsByTagName('tr')) : [];
 
             const cardsContainer = document.getElementById('departemenCards');
-            const cards = Array.from(cardsContainer.children);
+            const cards = cardsContainer ? Array.from(cardsContainer.children) : [];
 
             function filterTable() {
-                const query = searchInput.value.toLowerCase();
-                const limit = parseInt(entriesSelect.value);
+                const query = (searchInput.value || '').toLowerCase();
+                const limit = parseInt(entriesSelect.value || 10);
                 let visibleCount = 0;
 
                 // TABLE
                 rows.forEach(row => {
-                    const name = row.cells[1].textContent.toLowerCase();
+                    const name = (row.cells[1].textContent || '').toLowerCase();
                     const match = name.includes(query);
                     if (match && visibleCount < limit) {
                         row.style.display = '';
@@ -220,7 +320,8 @@
                 // CARDS
                 visibleCount = 0;
                 cards.forEach(card => {
-                    const name = card.querySelector('h4').textContent.toLowerCase();
+                    const titleEl = card.querySelector('h4');
+                    const name = titleEl ? titleEl.textContent.toLowerCase() : '';
                     const match = name.includes(query);
                     if (match && visibleCount < limit) {
                         card.style.display = '';
@@ -231,9 +332,10 @@
                 });
             }
 
-            searchInput.addEventListener('keyup', filterTable);
-            entriesSelect.addEventListener('change', filterTable);
+            if (searchInput) searchInput.addEventListener('keyup', filterTable);
+            if (entriesSelect) entriesSelect.addEventListener('change', filterTable);
             filterTable();
         });
     </script>
+
 </x-app-layout>

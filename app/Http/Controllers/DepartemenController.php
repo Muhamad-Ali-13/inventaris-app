@@ -30,12 +30,31 @@ class DepartemenController extends Controller
         return view('departemen.edit', compact('departemen'));
     }
 
-    public function update(Request $request, Departemen $departemen)
+    public function update(Request $request, $id)
     {
-        $request->validate(['nama_departemen' => 'required|string|max:255']);
-        $departemen->update($request->all());
+        $request->validate([
+            'nama_departemen' => 'required|string|max:255',
+        ]);
+
+        $departemen = Departemen::findOrFail($id);
+        $departemen->update([
+            'nama_departemen' => $request->nama_departemen,
+        ]);
+
+        // Jika request via AJAX, kirim JSON
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'nama_departemen' => $departemen->nama_departemen,
+                'id' => $departemen->id,
+            ]);
+        }
+
+        // Jika biasa (non-AJAX)
         return redirect()->route('departemen.index')->with('success', 'Departemen berhasil diperbarui');
     }
+
+
 
 
     public function destroy(Departemen $departeman)
