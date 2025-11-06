@@ -15,6 +15,14 @@ class BarangController extends Controller
         return view('barang.index', compact('barang', 'kategori'));
     }
 
+    public function stok()
+    {
+        $barang = Barang::with('kategori')->get();
+        $kategori = \App\Models\Kategori::all();
+        return view('barang.stok', compact('barang', 'kategori'));
+    }
+
+
     public function create()
     {
         $kategori = Kategori::all();

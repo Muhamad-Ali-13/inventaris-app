@@ -48,7 +48,7 @@
                         <thead class="bg-green-100 text-green-800 uppercase text-xs">
                             <tr>
                                 <th class="px-6 py-3">No</th>
-                                <th class="px-6 py-3">NIP</th>
+                                <th class="px-6 py-3">NIK</th>
                                 <th class="px-6 py-3">Nama Lengkap</th>
                                 <th class="px-6 py-3">Departemen</th>
                                 <th class="px-6 py-3">No Telp</th>
@@ -68,7 +68,7 @@
                                     <td class="px-6 py-3">{{ $k->alamat ?? '-' }}</td>
                                     <td class="px-6 py-3">{{ $k->tanggal_masuk ?? '-' }}</td>
                                     <td class="px-6 py-3 text-center flex justify-center gap-2">
-                                        <button  class="text-blue-600 hover:text-blue-800"
+                                        <button type="button" class="text-blue-600 hover:text-blue-800"
                                             onclick="editKaryawanModal(this)" data-id="{{ $k->id }}"
                                             data-nip="{{ $k->nip }}" data-nama="{{ $k->nama_lengkap }}"
                                             data-departemen="{{ $k->departemen_id }}" data-telp="{{ $k->no_telp }}"
@@ -114,16 +114,19 @@
                                 <p><strong>Tanggal Masuk:</strong> {{ $k->tanggal_masuk ?? '-' }}</p>
                             </div>
                             <div class="flex gap-2 mt-4">
-                                <button type="button"
-                                    class="flex-1 bg-amber-400 hover:bg-amber-500 text-white py-2 rounded-lg text-sm font-medium"
+                                <button type="button" class="text-blue-600 hover:text-blue-800"
                                     onclick="editKaryawanModal(this)" data-id="{{ $k->id }}"
                                     data-nip="{{ $k->nip }}" data-nama="{{ $k->nama_lengkap }}"
                                     data-departemen="{{ $k->departemen_id }}" data-telp="{{ $k->no_telp }}"
                                     data-alamat="{{ $k->alamat }}" data-tanggal="{{ $k->tanggal_masuk }}">
-                                    <i class="fi fi-sr-file-edit mr-1"></i> Edit
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 inline" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M11 4h2m2 0h2a2 2 0 012 2v2m0 0v2m0-2h2m-2 0h-2m-2 0h-2m0 0V4m0 4H7m0 0H5m0 0H3m0 0V6a2 2 0 012-2h2m0 0h2m0 0v2" />
+                                    </svg>
                                 </button>
-                                <form action="{{ route('karyawans.destroy', $k->id) }}" method="POST" class="flex-1"
-                                    onsubmit="return confirm('Yakin ingin menghapus data ini?')">
+                                <form action="{{ route('karyawans.destroy', $k->id) }}" method="POST"
+                                    class="flex-1" onsubmit="return confirm('Yakin ingin menghapus data ini?')">
                                     @csrf @method('DELETE')
                                     <button title="Hapus" class="text-red-600 hover:text-red-800">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 inline" fill="none"
@@ -160,7 +163,7 @@
                         <h3 class="text-lg font-semibold text-green-700 mb-3">🧍 Data Karyawan</h3>
                         <div class="space-y-3">
                             <div>
-                                <label class="block text-sm font-medium text-gray-600 mb-1">NIP</label>
+                                <label class="block text-sm font-medium text-gray-600 mb-1">NIK</label>
                                 <input type="text" name="nip"
                                     class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none">
                             </div>
@@ -247,7 +250,6 @@
             document.getElementById(id).classList.add('hidden');
         }
 
-        // MODAL EDIT DINAMIS
         function editKaryawanModal(button) {
             const id = button.dataset.id;
             const nip = button.dataset.nip;
@@ -258,52 +260,53 @@
             const tanggal = button.dataset.tanggal;
 
             let html = `
-            <div id="editModal" class="fixed inset-0 flex items-center justify-center z-50">
-                <div class="fixed inset-0 bg-black/40 backdrop-blur-sm"></div>
-                <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative z-10">
-                    <div class="flex items-center justify-between border-b pb-3 mb-4">
-                        <h3 class="text-lg font-semibold text-gray-800">Edit Karyawan</h3>
-                    </div>
-                    <form action="/karyawans/${id}" method="POST" class="space-y-4">
-                        @csrf
-                        <input type="hidden" name="_method" value="PUT">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-600 mb-1">NIP</label>
-                            <input type="text" name="nip" value="${nip}" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-600 mb-1">Nama Lengkap</label>
-                            <input type="text" name="nama_lengkap" value="${nama}" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-600 mb-1">Departemen</label>
-                            <select name="departemen_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500">
-                                @foreach ($departemen as $d)
-                                    <option value="{{ $d->id }}" ${departemen == '{{ $d->id }}' ? 'selected' : ''}>{{ $d->nama_departemen }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-600 mb-1">No Telp</label>
-                            <input type="text" name="no_telp" value="${telp}" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-600 mb-1">Alamat</label>
-                            <textarea name="alamat" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500">${alamat}</textarea>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-600 mb-1">Tanggal Masuk</label>
-                            <input type="date" name="tanggal_masuk" value="${tanggal}" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500">
-                        </div>
-                        <div class="flex justify-end gap-3 pt-3 border-t">
-                            <button type="button" onclick="closeModal('editModal')" class="bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium px-5 py-2 rounded-lg">Batal</button>
-                            <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-medium px-5 py-2 rounded-lg">Simpan Perubahan</button>
-                        </div>
-                    </form>
+    <div id="editModal" class="fixed inset-0 flex items-center justify-center z-50">
+        <div class="fixed inset-0 bg-black/40 backdrop-blur-sm" onclick="closeModal('editModal')"></div>
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative z-10">
+            <div class="flex items-center justify-between border-b pb-3 mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">Edit Karyawan</h3>
+            </div>
+            <form action="/karyawans/${id}" method="POST" class="space-y-4">
+                @csrf
+                <input type="hidden" name="_method" value="PUT">
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">NIK</label>
+                    <input type="text" name="nip" value="${nip}" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500">
                 </div>
-            </div>`;
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Nama Lengkap</label>
+                    <input type="text" name="nama_lengkap" value="${nama}" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Departemen</label>
+                    <select name="departemen_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500">
+                        @foreach ($departemen as $d)
+                            <option value="{{ $d->id }}" ${departemen == {{ $d->id }} ? 'selected' : ''}>{{ $d->nama_departemen }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">No Telp</label>
+                    <input type="text" name="no_telp" value="${telp}" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Alamat</label>
+                    <textarea name="alamat" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500">${alamat}</textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Tanggal Masuk</label>
+                    <input type="date" name="tanggal_masuk" value="${tanggal}" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500">
+                </div>
+                <div class="flex justify-end gap-3 pt-3 border-t">
+                    <button type="button" onclick="closeModal('editModal')" class="bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium px-5 py-2 rounded-lg">Batal</button>
+                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-medium px-5 py-2 rounded-lg">Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>`;
             document.getElementById('editModalContainer').innerHTML = html;
         }
+
 
         // SEARCH, FILTER & ENTRIES
         document.addEventListener("DOMContentLoaded", () => {

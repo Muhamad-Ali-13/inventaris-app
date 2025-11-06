@@ -82,7 +82,6 @@
                                     <td class="px-6 py-3">
                                         @foreach ($trx->details as $d)
                                             <div class="flex items-center gap-2">
-                                                <i class="fi fi-rr-box text-gray-500"></i>
                                                 {{ $d->barang->nama_barang }} ({{ $d->jumlah }})
                                             </div>
                                         @endforeach

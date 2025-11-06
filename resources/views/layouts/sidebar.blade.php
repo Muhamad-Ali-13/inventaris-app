@@ -63,15 +63,23 @@
                             <span>Kategori</span>
                         </a>
 
-                        <a href="{{ route('barang.index') }}"
-                            class="flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-all duration-200
+                        @can('role-A')
+                            <a href="{{ route('barang.index') }}"
+                                class="flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-all duration-200
             {{ request()->routeIs('barang.index') ? 'bg-green-100 font-semibold text-green-800 ring-1 ring-green-300' : 'hover:bg-green-50' }}">
-                            <i class="fi fi-rr-box"></i>
-                            <span>Barang</span>
-                        </a>
+                                <i class="fi fi-rr-box"></i>
+                                <span>Barang</span>
+                            </a>
+                        @endcan
                     </div>
                 </div>
             @endcan
+
+            <a href="{{ route('stok.barang') }}"
+                class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 
+        {{ request()->routeIs('stok.barang') ? 'bg-green-100 font-semibold text-green-800 shadow-inner ring-2 ring-green-300' : 'hover:bg-green-50 hover:translate-x-1' }}">
+                <i class="fi fi-rr-box"></i> <span>Stok Barang</span>
+            </a>
 
             <!-- DROPDOWN: TRANSAKSI -->
             <div x-data="{ openTransaksi: {{ request()->routeIs('pemasukan.index', 'pengeluaran.index') ? 'true' : 'false' }} }">
@@ -86,12 +94,12 @@
 
                 <div x-show="openTransaksi" x-transition class="pl-8 space-y-1 mt-1">
                     @can('role-A')
-                    <a href="{{ route('pemasukan.index') }}"
-                        class="flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-all duration-200
+                        <a href="{{ route('pemasukan.index') }}"
+                            class="flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-all duration-200
             {{ request()->routeIs('pemasukan.index') ? 'bg-green-100 font-semibold text-green-800 ring-1 ring-green-300' : 'hover:bg-green-50' }}">
-                        <i class="fi fi-rr-arrow-trend-up"></i>
-                        <span>Pemasukan</span>
-                    </a>
+                            <i class="fi fi-rr-arrow-trend-up"></i>
+                            <span>Pemasukan</span>
+                        </a>
                     @endcan
 
                     <a href="{{ route('pengeluaran.index') }}"

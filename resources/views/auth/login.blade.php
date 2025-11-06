@@ -66,22 +66,36 @@
                 </div>
             </form>
 
+            <!-- Info Hubungi Admin -->
+            <div class="text-center">
+                <p class="text-sm text-gray-600">
+                    Belum punya akun?
+                    <a href="https://wa.me/6281234567890" target="_blank"
+                        class="text-green-600 font-semibold hover:underline">
+                        Hubungi admin untuk pendaftaran akun
+                    </a>
+                </p>
+            </div>
+
             <!-- Divider -->
-            <div class="flex items-center justify-center mt-6">
+
+            {{-- <div class="flex items-center justify-center mt-6">
                 <div class="border-t border-gray-300 w-1/4"></div>
                 <span class="mx-3 text-gray-500 text-sm">atau</span>
                 <div class="border-t border-gray-300 w-1/4"></div>
             </div>
 
-            <!-- Register -->
+            <!-- Info Hubungi Admin -->
             <div class="text-center">
                 <p class="text-sm text-gray-600">
                     Belum punya akun?
-                    <a href="{{ route('register') }}" class="text-green-600 font-semibold hover:underline">
-                        Daftar sekarang
-                    </a>
+                    <span class="text-green-600 font-semibold">
+                        Silakan hubungi admin untuk pendaftaran akun.
+                    </span>
                 </p>
-            </div>
+            </div> --}}
+
+
         </div>
     </div>
 
