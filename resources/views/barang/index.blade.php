@@ -46,7 +46,7 @@
                         </select>
                     </div>
 
-                    
+
                     <!-- Search -->
                     <div class="relative w-full sm:w-64">
                         <input type="text" id="searchInput" placeholder="Cari nama barang..."
@@ -76,24 +76,33 @@
                                     <td class="px-6 py-3">{{ $index + 1 }}</td>
                                     <td class="px-6 py-3 font-medium text-gray-800">{{ $b->nama_barang }}</td>
                                     <td class="px-6 py-3">{{ $b->kategori->nama_kategori }}</td>
-                                    <td class="px-6 py-3 {{ $b->stok == 0 ? 'text-red-600 font-semibold' : 'text-gray-800' }}">{{ $b->stok }}</td>
+                                    <td
+                                        class="px-6 py-3 {{ $b->stok == 0 ? 'text-red-600 font-semibold' : 'text-gray-800' }}">
+                                        {{ $b->stok }}</td>
                                     <td class="px-6 py-3">{{ $b->satuan }}</td>
                                     @can('role-A')
                                         <td class="px-6 py-3 text-center flex justify-center gap-2">
-                                            <button type="button"
-                                                class="bg-amber-400 hover:bg-amber-500 text-white p-2.5 rounded-lg"
-                                                onclick="editBarangModal(this)" data-id="{{ $b->id }}"
+                                            <button onclick="editBarangModal(this)" data-id="{{ $b->id }}"
                                                 data-nama="{{ $b->nama_barang }}" data-kategori="{{ $b->kategori_id }}"
-                                                data-stok="{{ $b->stok }}" data-satuan="{{ $b->satuan }}">
-                                                <i class="fi fi-sr-file-edit"></i>
+                                                data-stok="{{ $b->stok }}" data-satuan="{{ $b->satuan }}"
+                                                title="Edit" class="text-blue-600 hover:text-blue-800">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 inline"
+                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M11 4h2m2 0h2a2 2 0 012 2v2m0 0v2m0-2h2m-2 0h-2m-2 0h-2m0 0V4m0 4H7m0 0H5m0 0H3m0 0V6a2 2 0 012-2h2m0 0h2m0 0v2" />
+                                                </svg>
                                             </button>
 
                                             <form action="{{ route('barang.destroy', $b->id) }}" method="POST"
                                                 onsubmit="return confirm('Yakin ingin menghapus data ini?')">
                                                 @csrf @method('DELETE')
-                                                <button type="submit"
-                                                    class="bg-red-500 hover:bg-red-600 text-white p-2.5 rounded-lg">
-                                                    <i class="fi fi-sr-trash"></i>
+                                                <button title="Hapus" class="text-red-600 hover:text-red-800">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 inline"
+                                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4h6v3m-7 0h8" />
+                                                    </svg>
                                                 </button>
                                             </form>
                                         </td>
@@ -110,27 +119,36 @@
                         <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
                             <div class="flex justify-between items-center mb-2">
                                 <h4 class="font-semibold text-lg text-gray-800">{{ $b->nama_barang }}</h4>
-                                <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">{{ $b->kategori->nama_kategori }}</span>
+                                <span
+                                    class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">{{ $b->kategori->nama_kategori }}</span>
                             </div>
                             <div class="text-sm text-gray-600 space-y-1">
-                                <p><strong>Stok:</strong> <span class="{{ $b->stok == 0 ? 'text-red-500 font-semibold' : 'text-gray-800' }}">{{ $b->stok }}</span></p>
+                                <p><strong>Stok:</strong> <span
+                                        class="{{ $b->stok == 0 ? 'text-red-500 font-semibold' : 'text-gray-800' }}">{{ $b->stok }}</span>
+                                </p>
                                 <p><strong>Satuan:</strong> {{ $b->satuan }}</p>
                             </div>
                             @can('role-A')
                                 <div class="flex gap-2 mt-4">
-                                    <button type="button"
-                                        class="flex-1 bg-amber-400 hover:bg-amber-500 text-white py-2 rounded-lg text-sm font-medium"
-                                        onclick="editBarangModal(this)" data-id="{{ $b->id }}"
+                                    <button onclick="editBarangModal(this)" data-id="{{ $b->id }}"
                                         data-nama="{{ $b->nama_barang }}" data-kategori="{{ $b->kategori_id }}"
-                                        data-stok="{{ $b->stok }}" data-satuan="{{ $b->satuan }}">
-                                        <i class="fi fi-sr-file-edit mr-1"></i> Edit
+                                        data-stok="{{ $b->stok }}" data-satuan="{{ $b->satuan }}" title="Edit"
+                                        class="text-blue-600 hover:text-blue-800">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 inline" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M11 4h2m2 0h2a2 2 0 012 2v2m0 0v2m0-2h2m-2 0h-2m-2 0h-2m0 0V4m0 4H7m0 0H5m0 0H3m0 0V6a2 2 0 012-2h2m0 0h2m0 0v2" />
+                                        </svg>
                                     </button>
                                     <form action="{{ route('barang.destroy', $b->id) }}" method="POST"
                                         onsubmit="return confirm('Yakin ingin menghapus data ini?')" class="flex-1">
                                         @csrf @method('DELETE')
-                                        <button type="submit"
-                                            class="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg text-sm font-medium">
-                                            <i class="fi fi-sr-trash mr-1"></i> Hapus
+                                        <button title="Hapus" class="text-red-600 hover:text-red-800">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 inline" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4h6v3m-7 0h8" />
+                                            </svg>
                                         </button>
                                     </form>
                                 </div>
@@ -155,7 +173,8 @@
                 @csrf
                 <div>
                     <label for="nama_barang" class="block text-sm font-medium text-gray-600 mb-1">Nama Barang</label>
-                    <input type="text" name="nama_barang" id="nama_barang" required placeholder="Contoh: Pulpen, Buku, Monitor"
+                    <input type="text" name="nama_barang" id="nama_barang" required
+                        placeholder="Contoh: Pulpen, Buku, Monitor"
                         class="w-full border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500 rounded-lg px-3 py-2 text-gray-800 placeholder-gray-400 transition duration-200" />
                 </div>
                 <div>
@@ -176,7 +195,8 @@
                     </div>
                     <div>
                         <label for="satuan" class="block text-sm font-medium text-gray-600 mb-1">Satuan</label>
-                        <input type="text" name="satuan" id="satuan" required placeholder="Contoh: pcs, box, unit"
+                        <input type="text" name="satuan" id="satuan" required
+                            placeholder="Contoh: pcs, box, unit"
                             class="w-full border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500 rounded-lg px-3 py-2 text-gray-800 transition duration-200" />
                     </div>
                 </div>
@@ -202,12 +222,14 @@
                 @csrf
                 <input type="hidden" name="_method" value="PATCH">
                 <div>
-                    <label for="edit_nama_barang" class="block text-sm font-medium text-gray-600 mb-1">Nama Barang</label>
+                    <label for="edit_nama_barang" class="block text-sm font-medium text-gray-600 mb-1">Nama
+                        Barang</label>
                     <input type="text" name="nama_barang" id="edit_nama_barang" required
                         class="w-full border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500 rounded-lg px-3 py-2 text-gray-800 transition duration-200" />
                 </div>
                 <div>
-                    <label for="edit_kategori_id" class="block text-sm font-medium text-gray-600 mb-1">Kategori</label>
+                    <label for="edit_kategori_id"
+                        class="block text-sm font-medium text-gray-600 mb-1">Kategori</label>
                     <select name="kategori_id" id="edit_kategori_id" required
                         class="w-full border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500 rounded-lg px-3 py-2 text-gray-800 transition duration-200">
                         @foreach ($kategori as $k)
@@ -231,7 +253,8 @@
                     <button type="button" onclick="barangModalClose()"
                         class="bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium px-5 py-2 rounded-lg">Batal</button>
                     <button type="submit"
-                        class="bg-green-600 hover:bg-green-700 text-white font-medium px-5 py-2 rounded-lg">Simpan Perubahan</button>
+                        class="bg-green-600 hover:bg-green-700 text-white font-medium px-5 py-2 rounded-lg">Simpan
+                        Perubahan</button>
                 </div>
             </form>
         </div>
@@ -240,8 +263,14 @@
     <!-- SCRIPT -->
     <script>
         // MODAL
-        function tambahBarangModal() { document.getElementById('tambahBarangModal').classList.remove('hidden'); }
-        function tambahBarangModalClose() { document.getElementById('tambahBarangModal').classList.add('hidden'); }
+        function tambahBarangModal() {
+            document.getElementById('tambahBarangModal').classList.remove('hidden');
+        }
+
+        function tambahBarangModalClose() {
+            document.getElementById('tambahBarangModal').classList.add('hidden');
+        }
+
         function editBarangModal(button) {
             const id = button.dataset.id;
             const nama = button.dataset.nama;
@@ -249,7 +278,8 @@
             const stok = button.dataset.stok;
             const satuan = button.dataset.satuan;
 
-            document.getElementById('formBarangModal').setAttribute('action', "{{ route('barang.update', ':id') }}".replace(':id', id));
+            document.getElementById('formBarangModal').setAttribute('action', "{{ route('barang.update', ':id') }}"
+                .replace(':id', id));
             document.getElementById('edit_nama_barang').value = nama;
             document.getElementById('edit_kategori_id').value = kategori;
             document.getElementById('edit_stok').value = stok;
@@ -257,7 +287,10 @@
 
             document.getElementById('barangModal').classList.remove('hidden');
         }
-        function barangModalClose() { document.getElementById('barangModal').classList.add('hidden'); }
+
+        function barangModalClose() {
+            document.getElementById('barangModal').classList.add('hidden');
+        }
 
         // SEARCH, FILTER & ENTRIES (client-side)
         document.addEventListener("DOMContentLoaded", () => {

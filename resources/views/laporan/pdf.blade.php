@@ -16,37 +16,34 @@
             color: #000;
         }
 
+        /* HEADER */
         .header {
-            text-align: center;
+            display: flex;
+            align-items: center;
             border-bottom: 2px solid #000;
             padding-bottom: 10px;
             margin-bottom: 15px;
         }
 
-        .header img {
-            width: 80px;
-            height: auto;
-            margin-bottom: 5px;
+        .header-text {
+            text-align: left;
         }
 
-        .header h1 {
-            font-size: 18px;
-            font-weight: bold;
+        .header-text p {
+            font-size: 12px;
             margin: 2px 0;
         }
 
-        .header h2 {
-            font-size: 16px;
-            margin: 2px 0;
-        }
-
-        .header p {
-            font-size: 13px;
-            margin: 2px 0;
-        }
-
+        /* JUDUL */
         h3 {
-            text-align: center;
+            text-align: start;
+            margin-top: 10px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            font-size: 12px;
+        }
+        h2 {
+            text-align: start;
             margin-top: 10px;
             margin-bottom: 5px;
             text-transform: uppercase;
@@ -54,11 +51,11 @@
         }
 
         .periode {
-            text-align: center;
-            font-size: 12px;
+            text-align: start font-size: 12px;
             margin-bottom: 20px;
         }
 
+        /* TABEL */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -68,30 +65,21 @@
         th,
         td {
             border: 1px solid #000;
-            padding: 6px 8px;
-            vertical-align: top;
+            padding: 8px;
+            text-align: center;
+            vertical-align: middle;
         }
 
         th {
-            background-color: #e5f9e0;
+            background-color: #f9f9f9;
             font-weight: bold;
-            text-align: center;
-        }
-
-        td {
-            text-align: left;
         }
 
         tr:nth-child(even) {
             background-color: #f9f9f9;
         }
 
-        .footer {
-            margin-top: 40px;
-            font-size: 12px;
-            text-align: right;
-        }
-
+        /* TANDA TANGAN */
         .ttd {
             margin-top: 50px;
             width: 100%;
@@ -112,29 +100,31 @@
     </style>
 </head>
 
-<body>
+<body onload="window.print()">
     {{-- HEADER --}}
     <div class="header">
-        <img src="{{ public_path('image/logo.png') }}" alt="Logo Perusahaan">
-        <h1>PT. Bank Perekonomian Rakyat Artha Jaya Mandiri</h1>
-        <p>Jl. Dr. Moch Hatta No. 216 Kel. Sukamanah Kec. Cipedes Kota Tasikmalaya</p>
-        <p>Telp. (0265) 5305252| Email: info@arthajaya.co.id</p>
+        <div class="header-text">
+            <h3>PT. BPR Artha Jaya Mandiri</h3>
+            <p>Jl. Dr. Moch Hatta No. 216 Kel. Sukamanah Kec. Cipedes Kota Tasikmalaya</p>
+            <p>Telp. (0265) 5305252 | Email: bpr.ajm.216@gmail.com</p>
+        </div>
     </div>
 
-    {{-- JUDUL LAPORAN --}}
-    <h3>LAPORAN TRANSAKSI INVENTARIS</h3>
+    {{-- JUDUL --}}
+    <h2>Laporan Transaksi Inventaris</h2>
     <p class="periode">
         Periode: {{ date('d-m-Y', strtotime($tanggal_awal)) }} s/d {{ date('d-m-Y', strtotime($tanggal_akhir)) }}
     </p>
 
-    {{-- TABEL DATA --}}
+        {{-- TABEL --}}
     <table>
         <thead>
             <tr>
                 <th style="width: 4%">No</th>
-                <th style="width: 15%">Tanggal Disetujui</th>
-                <th style="width: 20%">Nama</th>
-                <th style="width: 20%">Departemen</th>
+                <th style="width: 12%">Tanggal Disetujui</th>
+                <th style="width: 15%">Nama</th>
+                <th style="width: 15%">Departemen</th>
+                <th style="width: 10%">Jenis Transaksi</th>
                 <th>Barang & Jumlah</th>
                 <th style="width: 12%">Status</th>
             </tr>
@@ -142,38 +132,31 @@
         <tbody>
             @forelse($transaksis as $i => $trx)
                 <tr>
-                    <td style="text-align:center">{{ $i + 1 }}</td>
-                    <td style="text-align:center">
+                    <td>{{ $i + 1 }}</td>
+                    <td>
                         {{ $trx->tanggal_approval ? \Carbon\Carbon::parse($trx->tanggal_approval)->format('d-m-Y') : '-' }}
                     </td>
                     <td>{{ $trx->user->name ?? 'ADMIN' }}</td>
-                    <td style="text-align:center">{{ $trx->departemen->nama_departemen ?? '-' }}</td>
+                    <td>{{ $trx->departemen->nama_departemen ?? '-' }}</td>
+                    <td>{{ ucfirst($trx->jenis ?? '-') }}</td>
                     <td>
-                        @if ($trx->details->count() > 0)
+                        @if ($trx->details && $trx->details->count() > 0)
                             @foreach ($trx->details as $d)
-                                • {{ $d->barang->nama_barang ?? '-' }} ({{ $d->jumlah }})<br>
+                                {{ $d->barang->nama_barang ?? '-' }} ({{ $d->jumlah }})<br>
                             @endforeach
                         @else
                             -
                         @endif
                     </td>
-                    <td style="text-align:center">
-                        {{ ucfirst($trx->status) }}
-                    </td>
+                    <td>{{ ucfirst($trx->status) }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="5" style="text-align:center">Tidak ada data transaksi</td>
+                    <td colspan="7">Tidak ada data transaksi</td>
                 </tr>
             @endforelse
         </tbody>
     </table>
-
-    {{-- FOOTER
-    <div class="footer">
-        Dicetak pada: {{ date('d-m-Y') }} <br>
-        Oleh: {{ Auth::user()->name ?? 'User' }}
-    </div> --}}
 
     {{-- TANDA TANGAN --}}
     <div class="ttd">

@@ -35,9 +35,11 @@
                                 <th class="px-6 py-3">Tanggal Pengajuan</th>
                                 <th class="px-6 py-3">Tanggal Disetujui</th>
                                 <th class="px-6 py-3">Barang</th>
+                                <th class="px-6 py-3">Keterangan</th>
                                 @if (auth()->user()->role == 'A')
                                     <th class="px-6 py-3 text-center">Aksi</th>
                                 @endif
+
                             </tr>
                         </thead>
                         <tbody>
@@ -48,9 +50,9 @@
                                     <td class="px-6 py-3">
                                         <span
                                             class="px-2 py-1 text-xs font-semibold rounded-full
-                                            @if ($trx->status == 'approved') bg-green-100 text-green-700
-                                            @elseif($trx->status == 'rejected') bg-red-100 text-red-700
-                                            @else bg-yellow-100 text-yellow-700 @endif">
+                    @if ($trx->status == 'approved') bg-green-100 text-green-700
+                    @elseif($trx->status == 'rejected') bg-red-100 text-red-700
+                    @else bg-yellow-100 text-yellow-700 @endif">
                                             {{ ucfirst($trx->status) }}
                                         </span>
                                     </td>
@@ -61,9 +63,23 @@
                                             <div>{{ $d->barang->nama_barang }} ({{ $d->jumlah }})</div>
                                         @endforeach
                                     </td>
-                                    @can('role-A')
-                                    <td class="px-6 py-3 text-center space-x-1">
+                                    <td class="px-6 py-3">
                                         @if ($trx->status == 'pending')
+                                            <span class="text-gray-400 text-xs">⏳ Menunggu proses</span>
+                                        @endif
+                                        {{-- 🟢 Info Sudah Diproses --}}
+                                        @if ($trx->status == 'approved')
+                                            <span class="text-gray-400 text-xs">✅ Sudah diproses</span>
+                                        @endif
+                                        {{-- 🟠 Info Belum Diproses --}}
+                                        @if ($trx->status == 'rejected')
+                                            <span class="text-gray-400 text-xs">❌ proses ditolak</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-3 text-center space-x-2">
+
+                                        {{-- 🔑 Tombol Approve / Reject (Khusus Admin) --}}
+                                        @if (auth()->user()->role == 'A' && $trx->status == 'pending')
                                             <!-- APPROVE -->
                                             <form action="{{ route('pengeluaran.approve', $trx->id) }}" method="POST"
                                                 class="inline">@csrf
@@ -87,8 +103,10 @@
                                                     </svg>
                                                 </button>
                                             </form>
+                                        @endif
 
-                                            <!-- EDIT -->
+                                        {{-- ✏️ Tombol Edit (Hanya Muncul Jika Pending) --}}
+                                        @if ($trx->status == 'pending')
                                             <button
                                                 onclick="openEditModal({{ $trx->id }}, '{{ $trx->tanggal_pengajuan }}')"
                                                 title="Edit" class="text-blue-600 hover:text-blue-800">
@@ -99,25 +117,28 @@
                                                         d="M11 4h2m2 0h2a2 2 0 012 2v2m0 0v2m0-2h2m-2 0h-2m-2 0h-2m0 0V4m0 4H7m0 0H5m0 0H3m0 0V6a2 2 0 012-2h2m0 0h2m0 0v2" />
                                                 </svg>
                                             </button>
-
-                                            <!-- DELETE -->
-                                            <form action="{{ route('pengeluaran.destroy', $trx->id) }}" method="POST"
-                                                onsubmit="return confirm('Yakin hapus transaksi ini?')" class="inline">
-                                                @csrf @method('DELETE')
-                                                <button title="Hapus" class="text-red-600 hover:text-red-800">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 inline"
-                                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2"
-                                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4h6v3m-7 0h8" />
-                                                    </svg>
-                                                </button>
-                                            </form>
-                                        @else
-                                            <span class="text-gray-400 text-xs">✅ Sudah diproses</span>
                                         @endif
+
+                                        {{-- ✅ Tombol Hapus Selalu Ada --}}
+                                        <form action="{{ route('pengeluaran.destroy', $trx->id) }}" method="POST"
+                                            onsubmit="return confirm('Yakin hapus transaksi ini?')" class="inline">
+                                            @csrf @method('DELETE')
+                                            <button title="Hapus" class="text-red-600 hover:text-red-800">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 inline"
+                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4h6v3m-7 0h8" />
+                                                </svg>
+                                            </button>
+                                        </form>
+
+                                        
+
+
+
+
                                     </td>
-                                    @endcan
                                 </tr>
                             @empty
                                 <tr>
@@ -125,6 +146,7 @@
                                 </tr>
                             @endforelse
                         </tbody>
+
                     </table>
                 </div>
 

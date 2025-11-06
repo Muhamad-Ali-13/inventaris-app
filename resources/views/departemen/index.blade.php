@@ -62,19 +62,26 @@
                                     <td class="px-6 py-3 font-medium text-gray-800">{{ $d->nama_departemen }}</td>
                                     @can('role-A')
                                         <td class="px-6 py-3 text-center flex justify-center gap-2">
-                                            <button type="button"
-                                                class="bg-amber-400 hover:bg-amber-500 text-white p-2.5 rounded-lg"
+                                            <button class="text-blue-600 hover:text-blue-800"
                                                 onclick="editDepartemenModal(this)" data-id="{{ $d->id }}"
                                                 data-nama="{{ $d->nama_departemen }}">
-                                                <i class="fi fi-sr-file-edit"></i>
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 inline"
+                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M11 4h2m2 0h2a2 2 0 012 2v2m0 0v2m0-2h2m-2 0h-2m-2 0h-2m0 0V4m0 4H7m0 0H5m0 0H3m0 0V6a2 2 0 012-2h2m0 0h2m0 0v2" />
+                                                </svg>
                                             </button>
 
                                             <form action="{{ route('departemen.destroy', $d->id) }}" method="POST"
                                                 onsubmit="return confirm('Yakin ingin menghapus data ini?')">
                                                 @csrf @method('DELETE')
-                                                <button type="submit"
-                                                    class="bg-red-500 hover:bg-red-600 text-white p-2.5 rounded-lg">
-                                                    <i class="fi fi-sr-trash"></i>
+                                                <button title="Hapus" class="text-red-600 hover:text-red-800">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 inline"
+                                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4h6v3m-7 0h8" />
+                                                    </svg>
                                                 </button>
                                             </form>
                                         </td>
@@ -94,18 +101,23 @@
                             </div>
                             @can('role-A')
                                 <div class="flex gap-2 mt-4">
-                                    <button type="button"
-                                        class="flex-1 bg-amber-400 hover:bg-amber-500 text-white py-2 rounded-lg text-sm font-medium"
-                                        onclick="editDepartemenModal(this)" data-id="{{ $d->id }}"
-                                        data-nama="{{ $d->nama_departemen }}">
-                                        <i class="fi fi-sr-file-edit mr-1"></i> Edit
+                                    <button class="text-blue-600 hover:text-blue-800" onclick="editDepartemenModal(this)"
+                                        data-id="{{ $d->id }}" data-nama="{{ $d->nama_departemen }}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 inline" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M11 4h2m2 0h2a2 2 0 012 2v2m0 0v2m0-2h2m-2 0h-2m-2 0h-2m0 0V4m0 4H7m0 0H5m0 0H3m0 0V6a2 2 0 012-2h2m0 0h2m0 0v2" />
+                                        </svg>
                                     </button>
                                     <form action="{{ route('departemen.destroy', $d->id) }}" method="POST"
                                         onsubmit="return confirm('Yakin ingin menghapus data ini?')" class="flex-1">
                                         @csrf @method('DELETE')
-                                        <button type="submit"
-                                            class="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg text-sm font-medium">
-                                            <i class="fi fi-sr-trash mr-1"></i> Hapus
+                                        <button title="Hapus" class="text-red-600 hover:text-red-800">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 inline" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4h6v3m-7 0h8" />
+                                            </svg>
                                         </button>
                                     </form>
                                 </div>

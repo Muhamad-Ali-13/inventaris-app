@@ -34,10 +34,10 @@ class PemasukanController extends Controller
 
         $transaksi = $query->when($search, function ($q) use ($search) {
             $q->whereHas('user', fn($uq) => $uq->where('name', 'like', "%$search%"))
-              ->orWhereHas('departemen', fn($dq) => $dq->where('nama_departemen', 'like', "%$search%"))
-              ->orWhere('jenis', 'like', "%$search%");
+                ->orWhereHas('departemen', fn($dq) => $dq->where('nama_departemen', 'like', "%$search%"))
+                ->orWhere('jenis', 'like', "%$search%");
         })->orderBy('tanggal_pengajuan', 'desc')
-          ->paginate($entries);
+            ->paginate($entries);
 
         $barang = Barang::all(); // bisa termasuk stok = 0
         $departemen = Departemen::all();
@@ -54,17 +54,16 @@ class PemasukanController extends Controller
         $validated = $request->validate([
             'tanggal_pengajuan' => 'required|date',
             'barang_id' => 'required|array',
-            'barang_id.*' => 'required|exists:barang,id',
+            'barang_id.*' => 'exists:barang,id',
             'barang_jumlah' => 'required|array',
-            'barang_jumlah.*' => 'required|integer|min:1',
+            'barang_jumlah.*' => 'integer|min:1',
         ]);
 
-        // departemen user non-admin
         $departemenId = null;
         if (!$isAdmin) {
             $karyawan = Karyawan::where('user_id', Auth::id())->first();
             if (!$karyawan) {
-                return back()->with('error', 'Data karyawan untuk user ini tidak ditemukan.');
+                return back()->with('error', 'Data karyawan tidak ditemukan.');
             }
             $departemenId = $karyawan->departemen_id;
         }
@@ -87,8 +86,62 @@ class PemasukanController extends Controller
             }
         });
 
-        return redirect()->route('pemasukan.index')->with('success', '✅ Data pemasukan berhasil ditambahkan (menunggu approval).');
+        return redirect()->route('pemasukan.index')
+            ->with('success', '✅ Data pemasukan berhasil ditambahkan (menunggu approval).');
     }
+
+
+    public function update(Request $request, $id)
+    {
+        $transaksi = Transaksi::with('details')->findOrFail($id);
+
+        if ($transaksi->status !== 'pending') {
+            return back()->with('error', 'Transaksi sudah diproses dan tidak bisa diubah.');
+        }
+
+        if (Auth::user()->role !== 'A' && $transaksi->user_id !== Auth::id()) {
+            return back()->with('error', 'Tidak memiliki izin mengubah transaksi ini.');
+        }
+
+        $isAdmin = Auth::user()->role === 'A';
+
+        $validated = $request->validate([
+            'tanggal_pengajuan' => 'required|date',
+            'barang_id' => 'required|array',
+            'barang_id.*' => 'required|exists:barang,id',
+            'barang_jumlah' => 'required|array',
+            'barang_jumlah.*' => 'required|integer|min:1',
+        ]);
+
+        $departemenId = $transaksi->departemen_id;
+        if (!$isAdmin) {
+            $karyawan = Karyawan::where('user_id', Auth::id())->first();
+            if (!$karyawan) {
+                return back()->with('error', 'Data karyawan untuk user ini tidak ditemukan.');
+            }
+            $departemenId = $karyawan->departemen_id;
+        }
+
+        DB::transaction(function () use ($transaksi, $validated, $departemenId) {
+            $transaksi->update([
+                'tanggal_pengajuan' => $validated['tanggal_pengajuan'],
+                'departemen_id' => $departemenId,
+            ]);
+
+            $transaksi->details()->delete();
+
+            foreach ($validated['barang_id'] as $i => $barangId) {
+                TransaksiDetail::create([
+                    'transaksi_id' => $transaksi->id,
+                    'barang_id' => $barangId,
+                    'jumlah' => $validated['barang_jumlah'][$i],
+                ]);
+            }
+        });
+
+        return redirect()->route('pemasukan.index')->with('success', '✏️ Data pemasukan berhasil diperbarui.');
+    }
+
 
     public function approve($id)
     {
