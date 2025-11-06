@@ -11,10 +11,10 @@
                 </div>
 
                 <!-- Form Filter -->
-                <form method="GET" action="{{ route('laporan.index') }}" class="space-y-4 mb-8">
+                <form method="GET" action="{{ route('laporan.index') }}" class="space-y-4 mb-8 w-full">
 
                     <!-- Grid Baris Pertama -->
-                    <div class="w-full grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                    <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
                         <!-- Dari Tanggal -->
                         <div>
                             <label for="tanggal_awal" class="block text-sm font-semibold text-gray-700 mb-1">
@@ -33,23 +33,13 @@
                                 class="w-full border-gray-300 focus:border-green-500 focus:ring-green-500 rounded-lg shadow-sm">
                         </div>
 
-                        <!-- Tombol Filter & Reset -->
-                        <div class="flex flex-wrap gap-2 md:col-span-2">
-                            <button type="submit"
-                                class="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg shadow transition w-full md:w-auto justify-center">
-                                <i class="fi fi-rr-filter text-sm"></i> Filter
-                            </button>
-                            <a href="{{ route('laporan.index') }}"
-                                class="flex items-center gap-2 px-4 py-2 bg-gray-400 hover:bg-gray-500 text-white font-semibold rounded-lg shadow transition w-full md:w-auto justify-center">
-                                <i class="fi fi-rr-rotate-left text-sm"></i> Reset
-                            </a>
-                        </div>
                     </div>
 
                     <!-- Grid Baris Kedua -->
-                    <div class="w-full grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                    <div class="w-full grid grid-cols-1 md:grid-cols-6 gap-4 items-end mt-4">
+
                         <!-- Jenis Transaksi -->
-                        <div>
+                        <div class="md:col-span-1">
                             <label for="jenis" class="block text-sm font-semibold text-gray-700 mb-1">
                                 Jenis Transaksi
                             </label>
@@ -64,7 +54,7 @@
                         </div>
 
                         <!-- Departemen -->
-                        <div>
+                        <div class="md:col-span-1">
                             <label for="departemen_id" class="block text-sm font-semibold text-gray-700 mb-1">
                                 Departemen
                             </label>
@@ -81,8 +71,20 @@
                             </select>
                         </div>
 
+                        <!-- Tombol Filter & Reset -->
+                        <div class="md:col-span-2 flex flex-wrap gap-2">
+                            <button type="submit"
+                                class="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg shadow transition w-full md:w-auto justify-center">
+                                <i class="fi fi-rr-filter text-sm"></i> Filter
+                            </button>
+                            <a href="{{ route('laporan.index') }}"
+                                class="flex items-center gap-2 px-4 py-2 bg-gray-400 hover:bg-gray-500 text-white font-semibold rounded-lg shadow transition w-full md:w-auto justify-center">
+                                <i class="fi fi-rr-rotate-left text-sm"></i> Reset
+                            </a>
+                        </div>
+
                         <!-- Tombol Export -->
-                        <div class="flex flex-wrap gap-2 md:col-span-2">
+                        <div class="md:col-span-2 flex flex-wrap gap-2 justify-end">
                             <a href="{{ route('laporan.exportPdf', request()->all()) }}"
                                 class="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-lg shadow transition w-full md:w-auto justify-center">
                                 <i class="fi fi-rr-print text-sm"></i> Cetak PDF
@@ -92,10 +94,10 @@
                                 <i class="fi fi-rr-file-excel text-sm"></i> Export Excel
                             </a>
                         </div>
+
                     </div>
+
                 </form>
-
-
 
                 <!-- Tampilan Mobile -->
                 <div class="block md:hidden space-y-5">

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Transaksi;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\LaporanExport;
 use Carbon\Carbon;
 use App\Models\Departemen;
 use Illuminate\Support\Facades\Auth;
@@ -112,6 +114,19 @@ class LaporanController extends Controller
 
         return $pdf->download('laporan-transaksi.pdf');
     }
+
+    public function exportExcel(Request $request)
+    {
+        $tanggal_awal = $request->input('tanggal_awal', null);
+        $tanggal_akhir = $request->input('tanggal_akhir', null);
+        $jenis = $request->input('jenis', null);
+        $departemen_id = $request->input('departemen_id', null);
+
+        $nama_file = 'Laporan_Transaksi_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
+
+        return Excel::download(new LaporanExport($tanggal_awal, $tanggal_akhir, $jenis, $departemen_id), $nama_file);   
+    }
+
 
     public function cetakLaporan(Request $request)
     {

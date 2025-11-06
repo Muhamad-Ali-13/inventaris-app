@@ -6,64 +6,59 @@ use App\Models\Transaksi;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\WithStrictNullComparison;
 
-class LaporanExport implements FromCollection, WithHeadings, WithMapping, WithStrictNullComparison
-
+class LaporanExport implements FromCollection, WithHeadings, WithMapping
 {
     protected $tanggal_awal;
     protected $tanggal_akhir;
+    protected $jenis;
     protected $departemen_id;
-    protected $tipe;
 
-    public function __construct($tanggal_awal, $tanggal_akhir, $departemen_id, $tipe)
+    public function __construct($tanggal_awal, $tanggal_akhir, $jenis, $departemen_id)
     {
-        $this->tanggal_awal   = $tanggal_awal;
-        $this->tanggal_akhir  = $tanggal_akhir;
-        $this->departemen_id  = $departemen_id;
-        $this->tipe           = $tipe;
+        $this->tanggal_awal = $tanggal_awal;
+        $this->tanggal_akhir = $tanggal_akhir;
+        $this->jenis = $jenis;
+        $this->departemen_id = $departemen_id;
     }
 
     public function collection()
     {
-        $query = Transaksi::with(['departemen', 'details.barang'])
-            ->where('status', 'approved')
-            ->whereBetween('tanggal_approval', [$this->tanggal_awal, $this->tanggal_akhir]);
+        $query = Transaksi::with(['departemen', 'user'])
+            ->when($this->tanggal_awal, fn($q) => $q->whereDate('tanggal_approval', '>=', $this->tanggal_awal))
+            ->when($this->tanggal_akhir, fn($q) => $q->whereDate('tanggal_approval', '<=', $this->tanggal_akhir))
+            ->when($this->jenis, fn($q) => $q->where('jenis', $this->jenis))
+            ->when($this->departemen_id, fn($q) => $q->where('departemen_id', $this->departemen_id))
+            ->orderBy('tanggal_approval', 'asc');
 
-        if ($this->departemen_id) {
-            $query->where('departemen_id', $this->departemen_id);
-        }
+        return $query->get();
+    }
 
-        if ($this->tipe) {
-            $query->where('tipe', $this->tipe);
-        }
-
-        return $query->orderBy('tanggal_approval', 'asc')->get();
+    public function map($transaksi): array
+    {
+        return [
+            $transaksi->id,
+            $transaksi->user->name ?? '-',
+            $transaksi->departemen->nama_departemen ?? '-',
+            ucfirst($transaksi->jenis),
+            $transaksi->tanggal_approval ?? '-',
+            $transaksi->details->map(function($detail) {
+                return $detail->barang->nama_barang . ' (' . $detail->jumlah . ')';
+            })->implode(', '),
+            $transaksi->status,
+        ];
     }
 
     public function headings(): array
     {
         return [
             'No',
-            'Tanggal Approval',
+            'Nama',
             'Departemen',
+            'Jenis Transaksi',
+            'Tanggal Disetujui',
             'Barang & Jumlah',
-            'Total Jumlah',
             'Status',
-        ];
-    }
-
-    public function map($trx): array
-    {
-        return [
-            $trx->id,
-            optional($trx->tanggal_approval)->format('d-m-Y'),
-            $trx->departemen->nama_departemen ?? '-',
-            $trx->details->count() > 0
-                ? $trx->details->map(fn($d) => ($d->barang->nama_barang ?? '-') . ' (' . $d->jumlah . ')')->implode(', ')
-                : '-',
-            $trx->details->sum('jumlah'),
-            ucfirst($trx->status),
         ];
     }
 }
