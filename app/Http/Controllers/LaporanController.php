@@ -40,7 +40,7 @@ class LaporanController extends Controller
         $query = Transaksi::with(['departemen', 'details.barang']);
 
         // Jika user bukan admin, batasi hanya transaksi milik user
-        if (Auth::user()->role !== 'A') {
+        if (Auth::user()->role !== 'Admin') {
             $query->where('user_id', Auth::id());
         }
 
@@ -88,7 +88,7 @@ class LaporanController extends Controller
 
         $query = Transaksi::with(['departemen', 'details.barang']);
 
-        if (Auth::user()->role !== 'A') {
+        if (Auth::user()->role !== 'Admin') {
             $query->where('user_id', Auth::id());
         }
 

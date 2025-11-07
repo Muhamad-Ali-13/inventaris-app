@@ -28,7 +28,7 @@ class PemasukanController extends Controller
         $entries = $request->get('entries', 10);
         $search = $request->get('search', null);
 
-        if (Auth::user()->role !== 'A') {
+        if (Auth::user()->role !== 'Admin') {
             $query->where('user_id', Auth::id());
         }
 
@@ -49,7 +49,7 @@ class PemasukanController extends Controller
 
     public function store(Request $request)
     {
-        $isAdmin = Auth::user()->role === 'A';
+        $isAdmin = Auth::user()->role === 'Admin';
 
         $validated = $request->validate([
             'tanggal_pengajuan' => 'required|date',

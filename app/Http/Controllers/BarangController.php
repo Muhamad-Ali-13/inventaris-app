@@ -10,7 +10,7 @@ class BarangController extends Controller
 {
     public function index()
     {
-        $barang = Barang::with('kategori')->get();
+        $barang = Barang::with('kategori')->paginate(10);
         $kategori = Kategori::all();
         return view('barang.index', compact('barang', 'kategori'));
     }

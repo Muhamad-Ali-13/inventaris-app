@@ -51,7 +51,7 @@ class KaryawanController extends Controller
                 'name'     => $validated['nama_lengkap'],
                 'email'    => $validated['email'],
                 'password' => Hash::make($validated['password']),
-                'role'     => 'U', // default role user (sesuaikan jika sistem Anda memakai 'karyawan' atau 'U')
+                'role'     => 'Karyawan', // default role user (sesuaikan jika sistem Anda memakai 'karyawan' atau 'U')
             ]);
 
             // 2) Buat karyawan terkait
@@ -75,22 +75,22 @@ class KaryawanController extends Controller
         }
     }
 
-    /**
-     * Update data karyawan (form edit di index.blade.php hanya mengirim field karyawan)
-     */
+
     public function update(Request $request, $id)
     {
         $karyawan = Karyawan::findOrFail($id);
 
         $validated = $request->validate([
-            'nip'            => ['nullable','string','max:50', Rule::unique('karyawans','nip')->ignore($karyawan->id)],
+            'nip'            => ['nullable', 'string', 'max:50', Rule::unique('karyawans', 'nip')->ignore($karyawan->id)],
             'nama_lengkap'   => 'required|string|max:255',
             'departemen_id'  => 'nullable|exists:departemen,id',
             'no_telp'        => 'nullable|string|max:20',
             'alamat'         => 'nullable|string',
             'tanggal_masuk'  => 'nullable|date',
+            'role'           => 'required|in:Admin,Direktur,Karyawan',
         ]);
 
+        // Update karyawan
         $karyawan->update([
             'nip'            => $validated['nip'] ?? null,
             'nama_lengkap'   => $validated['nama_lengkap'],
@@ -98,10 +98,19 @@ class KaryawanController extends Controller
             'no_telp'        => $validated['no_telp'] ?? null,
             'alamat'         => $validated['alamat'] ?? null,
             'tanggal_masuk'  => $validated['tanggal_masuk'] ?? null,
+            'role'           => $validated['role'],
         ]);
+
+        // Update role di tabel users
+        if ($karyawan->user) { // pastikan ada relasi user
+            $karyawan->user->update([
+                'role' => $validated['role'],
+            ]);
+        }
 
         return redirect()->route('karyawans.index')->with('success', 'Karyawan berhasil diperbarui.');
     }
+
 
     /**
      * Hapus karyawan (beserta user terkait jika ada)

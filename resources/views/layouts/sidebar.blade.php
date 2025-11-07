@@ -35,10 +35,16 @@
 
             @can('role-A')
                 <a href="{{ route('karyawans.index') }}"
-                    class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 {{ request()->routeIs('karyawans.index') ? 'bg-green-100 font-semibold text-green-800 shadow-inner ring-2 ring-green-300' : 'hover:bg-green-50 hover:translate-x-1' }}">
-                    <i class="fi fi-rr-people"></i> <span>Data Karyawan</span> </a>
-                <!-- DROPDOWN: MASTER DATA -->
-                <div x-data="{ openMaster: {{ request()->routeIs('departemen.index', 'kategori.index', 'barang.index') ? 'true' : 'false' }} }">
+                    class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200
+                {{ request()->routeIs('karyawans.*') ? 'bg-green-100 font-semibold text-green-800 shadow-inner ring-2 ring-green-300' : 'hover:bg-green-50 hover:translate-x-1' }}">
+                    <i class="fi fi-rr-people"></i>
+                    <span>Karyawan</span>
+                </a>
+            @endcan
+
+            {{-- MASTER DATA: Hanya Admin --}}
+            @can('role-A')
+                <div x-data="{ openMaster: {{ request()->routeIs('departemen.*', 'kategori.*', 'barang.*') ? 'true' : 'false' }} }">
                     <button @click="openMaster = !openMaster"
                         class="w-full flex items-center justify-between px-3 py-2 rounded-lg transition-all duration-200 hover:bg-green-50">
                         <div class="flex items-center gap-3">
@@ -51,29 +57,28 @@
                     <div x-show="openMaster" x-transition class="pl-8 space-y-1 mt-1">
                         <a href="{{ route('departemen.index') }}"
                             class="flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-all duration-200
-            {{ request()->routeIs('departemen.index') ? 'bg-green-100 font-semibold text-green-800 ring-1 ring-green-300' : 'hover:bg-green-50' }}">
+                {{ request()->routeIs('departemen.*') ? 'bg-green-100 font-semibold text-green-800 ring-1 ring-green-300' : 'hover:bg-green-50' }}">
                             <i class="fi fi-rr-building"></i>
                             <span>Departemen</span>
                         </a>
 
                         <a href="{{ route('kategori.index') }}"
                             class="flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-all duration-200
-            {{ request()->routeIs('kategori.index') ? 'bg-green-100 font-semibold text-green-800 ring-1 ring-green-300' : 'hover:bg-green-50' }}">
+                {{ request()->routeIs('kategori.*') ? 'bg-green-100 font-semibold text-green-800 ring-1 ring-green-300' : 'hover:bg-green-50' }}">
                             <i class="fi fi-rr-layers"></i>
                             <span>Kategori</span>
                         </a>
 
-                        @can('role-A')
-                            <a href="{{ route('barang.index') }}"
-                                class="flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-all duration-200
-            {{ request()->routeIs('barang.index') ? 'bg-green-100 font-semibold text-green-800 ring-1 ring-green-300' : 'hover:bg-green-50' }}">
-                                <i class="fi fi-rr-box"></i>
-                                <span>Barang</span>
-                            </a>
-                        @endcan
+                        <a href="{{ route('barang.index') }}"
+                            class="flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-all duration-200
+                {{ request()->routeIs('barang.*') ? 'bg-green-100 font-semibold text-green-800 ring-1 ring-green-300' : 'hover:bg-green-50' }}">
+                            <i class="fi fi-rr-box"></i>
+                            <span>Barang</span>
+                        </a>
                     </div>
                 </div>
             @endcan
+
 
             <a href="{{ route('stok.barang') }}"
                 class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 
@@ -81,8 +86,8 @@
                 <i class="fi fi-rr-box"></i> <span>Stok Barang</span>
             </a>
 
-            <!-- DROPDOWN: TRANSAKSI -->
-            <div x-data="{ openTransaksi: {{ request()->routeIs('pemasukan.index', 'pengeluaran.index') ? 'true' : 'false' }} }">
+            {{-- TRANSAKSI: Admin, Direktur, Karyawan --}}
+            <div x-data="{ openTransaksi: {{ request()->routeIs('pemasukan.*', 'pengeluaran.*') ? 'true' : 'false' }} }">
                 <button @click="openTransaksi = !openTransaksi"
                     class="w-full flex items-center justify-between px-3 py-2 rounded-lg transition-all duration-200 hover:bg-green-50">
                     <div class="flex items-center gap-3">
@@ -96,7 +101,7 @@
                     @can('role-A')
                         <a href="{{ route('pemasukan.index') }}"
                             class="flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-all duration-200
-            {{ request()->routeIs('pemasukan.index') ? 'bg-green-100 font-semibold text-green-800 ring-1 ring-green-300' : 'hover:bg-green-50' }}">
+                    {{ request()->routeIs('pemasukan.*') ? 'bg-green-100 font-semibold text-green-800 ring-1 ring-green-300' : 'hover:bg-green-50' }}">
                             <i class="fi fi-rr-arrow-trend-up"></i>
                             <span>Pemasukan</span>
                         </a>
@@ -104,22 +109,23 @@
 
                     <a href="{{ route('pengeluaran.index') }}"
                         class="flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-all duration-200
-            {{ request()->routeIs('pengeluaran.index') ? 'bg-green-100 font-semibold text-green-800 ring-1 ring-green-300' : 'hover:bg-green-50' }}">
+                {{ request()->routeIs('pengeluaran.*') ? 'bg-green-100 font-semibold text-green-800 ring-1 ring-green-300' : 'hover:bg-green-50' }}">
                         <i class="fi fi-rr-arrow-trend-down"></i>
                         <span>Pengeluaran</span>
                     </a>
                 </div>
             </div>
 
-            @can('role-A')
-                <!-- Laporan -->
+            {{-- LAPORAN: Admin + Direktur --}}
+            @canany(['role-A', 'role-D'])
                 <a href="{{ route('laporan.index') }}"
                     class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200
-                {{ request()->routeIs('laporan.index') ? 'bg-green-100 font-semibold text-green-800 shadow-inner ring-2 ring-green-300' : 'hover:bg-green-50 hover:translate-x-1' }}">
+        {{ request()->routeIs('laporan.*') ? 'bg-green-100 font-semibold text-green-800 shadow-inner ring-2 ring-green-300' : 'hover:bg-green-50 hover:translate-x-1' }}">
                     <i class="fi fi-rr-document"></i>
                     <span>Laporan</span>
                 </a>
-            @endcan
+            @endcanany
+
         </nav>
     </aside>
 

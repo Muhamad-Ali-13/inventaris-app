@@ -15,7 +15,7 @@ class DashboardController extends Controller
         $user = Auth::user();
 
         // Role ADMIN
-        if ($user->role === 'A') {
+        if ($user->role === 'Admin') {
             $jumlahKaryawan = Karyawan::count();
             $jumlahBarang = Barang::count();
             $jumlahTransaksi = Transaksi::count();
@@ -27,7 +27,7 @@ class DashboardController extends Controller
                 ->limit(5)->get();
 
             $bulanLabels = collect(range(1, 12))
-                ->map(fn ($m) => Carbon::create()->month($m)->translatedFormat('M'));
+                ->map(fn($m) => Carbon::create()->month($m)->translatedFormat('M'));
 
             $dataPemasukan = [];
             $dataPengeluaran = [];
@@ -55,8 +55,49 @@ class DashboardController extends Controller
                 'dataPemasukan',
                 'dataPengeluaran'
             ));
-        } 
-        
+        }
+        // Role DIREKTUR
+        elseif ($user->role === 'Direktur') {
+            $jumlahKaryawan = Karyawan::count();
+            $jumlahBarang = Barang::count();
+            $jumlahTransaksi = Transaksi::count();
+            $pendingTransaksi = Transaksi::where('status', 'pending')->count();
+
+            $transaksiTerbaru = Transaksi::with(['user', 'departemen'])
+                ->orderBy('tanggal_pengajuan', 'desc')
+                ->limit(5)->get();
+
+            $bulanLabels = collect(range(1, 12))
+                ->map(fn($m) => Carbon::create()->month($m)->translatedFormat('M'));
+
+            $dataPemasukan = [];
+            $dataPengeluaran = [];
+
+            foreach (range(1, 12) as $bulan) {
+                $dataPemasukan[] = Transaksi::where('jenis', 'pemasukan')
+                    ->whereMonth('tanggal_pengajuan', $bulan)
+                    ->whereYear('tanggal_pengajuan', now()->year)
+                    ->count();
+
+                $dataPengeluaran[] = Transaksi::where('jenis', 'pengeluaran')
+                    ->whereMonth('tanggal_pengajuan', $bulan)
+                    ->whereYear('tanggal_pengajuan', now()->year)
+                    ->count();
+            }
+
+            return view('dashboard.direktur', compact(
+                'jumlahKaryawan',
+                'jumlahBarang',
+                'jumlahTransaksi',
+                'pendingTransaksi',
+                'transaksiTerbaru',
+                'bulanLabels',
+                'dataPemasukan',
+                'dataPengeluaran'
+            ));
+        }
+
+
         // Role KARYAWAN
         else {
             $karyawan = Karyawan::where('user_id', $user->id)->with('departemen')->first();
@@ -68,7 +109,7 @@ class DashboardController extends Controller
                 ->limit(5)->get();
 
             $bulanLabels = collect(range(1, 12))
-                ->map(fn ($m) => Carbon::create()->month($m)->translatedFormat('M'));
+                ->map(fn($m) => Carbon::create()->month($m)->translatedFormat('M'));
 
             $dataTransaksi = [];
             foreach (range(1, 12) as $bulan) {

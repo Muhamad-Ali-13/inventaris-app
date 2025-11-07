@@ -61,10 +61,10 @@
                                         <button onclick="editKategoriModal(this)" data-id="{{ $k->id }}"
                                             data-nama="{{ $k->nama_kategori }}" title="Edit"
                                             class="text-blue-600 hover:text-blue-800">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 inline"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M11 4h2m2 0h2a2 2 0 012 2v2m0 0v2m0-2h2m-2 0h-2m-2 0h-2m0 0V4m0 4H7m0 0H5m0 0H3m0 0V6a2 2 0 012-2h2m0 0h2m0 0v2" />
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                stroke-width="2" stroke="currentColor" class="w-5 h-5 inline">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
                                             </svg>
                                         </button>
 
@@ -98,10 +98,10 @@
                                 <button onclick="editKategoriModal(this)" data-id="{{ $k->id }}"
                                     data-nama="{{ $k->nama_kategori }}" title="Edit"
                                     class="text-blue-600 hover:text-blue-800">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 inline" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M11 4h2m2 0h2a2 2 0 012 2v2m0 0v2m0-2h2m-2 0h-2m-2 0h-2m0 0V4m0 4H7m0 0H5m0 0H3m0 0V6a2 2 0 012-2h2m0 0h2m0 0v2" />
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="2" stroke="currentColor" class="w-5 h-5 inline">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
                                     </svg>
                                 </button>
                                 <form action="{{ route('kategori.destroy', $k->id) }}" method="POST"

@@ -16,34 +16,31 @@ use App\Http\Controllers\{
 };
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('auth.login');
-});
+// Login
+Route::get('/', fn() => view('auth.login'));
 
-// Dashboard (hanya bisa diakses user login & email terverifikasi)
+// Dashboard (login & email verified)
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
-// Semua route di bawah ini hanya bisa diakses user login
+// Semua route hanya untuk user login
 Route::middleware(['auth', 'throttle:60,1'])->group(function () {
 
-    // Profil user
+    // Profil
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Manajemen data dasar
-
+    // ----------------------
+    // Admin Only
+    // ----------------------
     Route::middleware('can:role-A')->group(function () {
+        // Master Data
+        Route::resource('karyawans', KaryawanController::class);
         Route::resource('departemen', DepartemenController::class);
         Route::resource('kategori', KategoriController::class);
         Route::resource('barang', BarangController::class);
-
-        // Laporan
-        Route::get('laporan', [LaporanController::class, 'index'])->name('laporan.index');
-        Route::get('laporan/pdf', [LaporanController::class, 'exportPdf'])->name('laporan.exportPdf');
-        Route::get('laporan/excel', [LaporanController::class, 'exportExcel'])->name('laporan.exportExcel');
 
         // Pemasukan
         Route::controller(PemasukanController::class)->group(function () {
@@ -54,22 +51,20 @@ Route::middleware(['auth', 'throttle:60,1'])->group(function () {
             Route::post('/pemasukan/{id}/reject', 'reject')->name('pemasukan.reject');
             Route::delete('/pemasukan/{id}', 'destroy')->name('pemasukan.destroy');
         });
+
+        Route::controller(PengeluaranController::class)->group(function () {
+            Route::get('/pengeluaran', 'index')->name('pengeluaran.index');
+            Route::post('/pengeluaran/store', 'store')->name('pengeluaran.store');
+            Route::put('/pengeluaran/{id}', 'update')->name('pengeluaran.update');
+            Route::post('/pengeluaran/{id}/approve', 'approve')->name('pengeluaran.approve');
+            Route::post('/pengeluaran/{id}/reject', 'reject')->name('pengeluaran.reject');
+            Route::get('/pengeluaran/{id}/edit-data', 'getEditData');
+            Route::delete('/pengeluaran/{id}', 'destroy')->name('pengeluaran.destroy');
+        });
+
+        // Log aktivitas
+        Route::get('log-aktivitas', [LogAktivitasController::class, 'index'])->name('log.index');
     });
-    // route untuk karyawan
-    Route::get('/stok-barang', [BarangController::class, 'stok'])->name('stok.barang');
-
-    // Transaksi
-    Route::resource('transaksi', TransaksiController::class);
-    Route::resource('transaksidetail', TransaksiDetailController::class);
-    Route::post('transaksi/{id}/approve', [TransaksiController::class, 'approve'])->name('transaksi.approve');
-    Route::post('transaksi/{id}/reject', [TransaksiController::class, 'reject'])->name('transaksi.reject');
-
-    // Log aktivitas
-    Route::get('log-aktivitas', [LogAktivitasController::class, 'index'])->name('log.index');
-
-
-    // Hanya role admin (role-A) yang bisa kelola karyawan
-    Route::resource('karyawans', KaryawanController::class)->middleware('can:role-A');
 
     // Pengeluaran
     Route::controller(PengeluaranController::class)->group(function () {
@@ -81,6 +76,25 @@ Route::middleware(['auth', 'throttle:60,1'])->group(function () {
         Route::get('/pengeluaran/{id}/edit-data', 'getEditData');
         Route::delete('/pengeluaran/{id}', 'destroy')->name('pengeluaran.destroy');
     });
+
+    // ----------------------
+    // Admin + Direktur
+    // ----------------------
+    Route::middleware('can:access-laporan')->group(function () {
+        Route::get('laporan', [LaporanController::class, 'index'])->name('laporan.index');
+        Route::get('laporan/pdf', [LaporanController::class, 'exportPdf'])->name('laporan.exportPdf');
+        Route::get('laporan/excel', [LaporanController::class, 'exportExcel'])->name('laporan.exportExcel');
+    });
+
+    // ----------------------
+    // Semua role (Admin, Direktur, Karyawan)
+    // ----------------------
+    Route::get('/stok-barang', [BarangController::class, 'stok'])->name('stok.barang');
+
+    Route::resource('transaksi', TransaksiController::class);
+    Route::resource('transaksidetail', TransaksiDetailController::class);
+    Route::post('transaksi/{id}/approve', [TransaksiController::class, 'approve'])->name('transaksi.approve');
+    Route::post('transaksi/{id}/reject', [TransaksiController::class, 'reject'])->name('transaksi.reject');
 
     // Barang per kategori
     Route::get('/barang/by-kategori/{id}', [BarangController::class, 'getByKategori']);

@@ -27,8 +27,21 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::define('role-A', function ($user) {
-            return $user->role === 'A';
+            return $user->role === 'Admin';
         });
+
+        Gate::define('role-D', function ($user) {
+            return $user->role === 'Direktur';
+        });
+
+        Gate::define('role-K', function ($user) {
+            return $user->role === 'Karyawan';
+        }); 
+
+        Gate::define('access-laporan', function ($user) {
+            return in_array($user->role, ['Admin', 'Direktur']); // Admin dan Direktur bisa akses
+        });
+
 
         if (Schema::hasTable('users')) {
             view()->share('jumlahKaryawan', User::count());

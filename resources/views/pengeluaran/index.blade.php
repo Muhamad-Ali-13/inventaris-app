@@ -15,7 +15,6 @@
                         + Tambah Pengeluaran
                     </button>
                 </div>
-
                 <!-- ALERT -->
                 @if (session('success'))
                     <div id="alertSuccess" class="mb-4 p-3 bg-green-100 text-green-700 rounded">{{ session('success') }}
@@ -36,7 +35,7 @@
                                 <th class="px-6 py-3">Tanggal Disetujui</th>
                                 <th class="px-6 py-3">Barang</th>
                                 <th class="px-6 py-3">Keterangan</th>
-                                @if (auth()->user()->role == 'A')
+                                @if (auth()->user()->role == 'Admin')
                                     <th class="px-6 py-3 text-center">Aksi</th>
                                 @endif
 
@@ -76,69 +75,65 @@
                                             <span class="text-gray-400 text-xs">❌ proses ditolak</span>
                                         @endif
                                     </td>
-                                    <td class="px-6 py-3 text-center space-x-2">
 
-                                        {{-- 🔑 Tombol Approve / Reject (Khusus Admin) --}}
-                                        @if (auth()->user()->role == 'A' && $trx->status == 'pending')
-                                            <!-- APPROVE -->
-                                            <form action="{{ route('pengeluaran.approve', $trx->id) }}" method="POST"
-                                                class="inline">@csrf
-                                                <button title="Setujui" class="text-green-600 hover:text-green-800">
+                                    @can('role-A')
+                                        <td class="px-6 py-3 text-center space-x-2">
+                                            {{-- 🔑 Tombol Approve / Reject (Khusus Admin) --}}
+                                            @if (auth()->user()->role == 'Admin' && $trx->status == 'pending')
+                                                <!-- APPROVE -->
+                                                <form action="{{ route('pengeluaran.approve', $trx->id) }}" method="POST"
+                                                    class="inline">@csrf
+                                                    <button title="Setujui" class="text-green-600 hover:text-green-800">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 inline"
+                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2" d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                    </button>
+                                                </form>
+
+                                                <!-- REJECT -->
+                                                <form action="{{ route('pengeluaran.reject', $trx->id) }}" method="POST"
+                                                    class="inline">@csrf
+                                                    <button title="Tolak" class="text-yellow-600 hover:text-yellow-800">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 inline"
+                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2" d="M18 12H6" />
+                                                        </svg>
+                                                    </button>
+                                                </form>
+                                            @endif
+
+                                            {{-- ✏️ Tombol Edit (Hanya Muncul Jika Pending) --}}
+                                            @if ($trx->status == 'pending')
+                                                <button
+                                                    onclick="openEditModal({{ $trx->id }}, '{{ $trx->tanggal_pengajuan }}')"
+                                                    title="Edit" class="text-blue-600 hover:text-blue-800">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                        viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                                                        class="w-5 h-5 inline">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                                    </svg>
+                                                </button>
+                                            @endif
+
+                                            {{-- ✅ Tombol Hapus Selalu Ada --}}
+                                            <form action="{{ route('pengeluaran.destroy', $trx->id) }}" method="POST"
+                                                onsubmit="return confirm('Yakin hapus transaksi ini?')" class="inline">
+                                                @csrf @method('DELETE')
+                                                <button title="Hapus" class="text-red-600 hover:text-red-800">
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 inline"
                                                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2" d="M5 13l4 4L19 7" />
+                                                            stroke-width="2"
+                                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4h6v3m-7 0h8" />
                                                     </svg>
                                                 </button>
                                             </form>
-
-                                            <!-- REJECT -->
-                                            <form action="{{ route('pengeluaran.reject', $trx->id) }}" method="POST"
-                                                class="inline">@csrf
-                                                <button title="Tolak" class="text-yellow-600 hover:text-yellow-800">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 inline"
-                                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2" d="M18 12H6" />
-                                                    </svg>
-                                                </button>
-                                            </form>
-                                        @endif
-
-                                        {{-- ✏️ Tombol Edit (Hanya Muncul Jika Pending) --}}
-                                        @if ($trx->status == 'pending')
-                                            <button
-                                                onclick="openEditModal({{ $trx->id }}, '{{ $trx->tanggal_pengajuan }}')"
-                                                title="Edit" class="text-blue-600 hover:text-blue-800">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 inline"
-                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M11 4h2m2 0h2a2 2 0 012 2v2m0 0v2m0-2h2m-2 0h-2m-2 0h-2m0 0V4m0 4H7m0 0H5m0 0H3m0 0V6a2 2 0 012-2h2m0 0h2m0 0v2" />
-                                                </svg>
-                                            </button>
-                                        @endif
-
-                                        {{-- ✅ Tombol Hapus Selalu Ada --}}
-                                        <form action="{{ route('pengeluaran.destroy', $trx->id) }}" method="POST"
-                                            onsubmit="return confirm('Yakin hapus transaksi ini?')" class="inline">
-                                            @csrf @method('DELETE')
-                                            <button title="Hapus" class="text-red-600 hover:text-red-800">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 inline"
-                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4h6v3m-7 0h8" />
-                                                </svg>
-                                            </button>
-                                        </form>
-
-                                        
-
-
-
-
-                                    </td>
+                                        </td>
+                                    @endcan
                                 </tr>
                             @empty
                                 <tr>
@@ -149,7 +144,10 @@
 
                     </table>
                 </div>
-
+                <!-- Pagination -->
+                <div class="mt-4">
+                    {{ $transaksi->withQueryString()->links() }}
+                </div>
             </div>
         </div>
     </div>

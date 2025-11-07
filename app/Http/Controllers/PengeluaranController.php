@@ -28,28 +28,27 @@ class PengeluaranController extends Controller
         $entries = $request->get('entries', 10);
         $search = $request->get('search', null);
 
-        if (Auth::user()->role !== 'A') {
+        if (Auth::user()->role !== 'Admin') {
             $query->where('user_id', Auth::id());
         }
 
         $transaksi = $query->when($search, function ($q) use ($search) {
             $q->whereHas('user', fn($uq) => $uq->where('name', 'like', "%$search%"))
-              ->orWhereHas('departemen', fn($dq) => $dq->where('nama_departemen', 'like', "%$search%"))
-              ->orWhere('jenis', 'like', "%$search%");
+                ->orWhereHas('departemen', fn($dq) => $dq->where('nama_departemen', 'like', "%$search%"))
+                ->orWhere('jenis', 'like', "%$search%");
         })->orderBy('tanggal_pengajuan', 'desc')
-          ->paginate($entries);
+            ->paginate($entries);
 
         $barang = Barang::where('stok', '>', 0)->get(); // hanya stok tersedia
         $departemen = Departemen::all();
         $users = User::all();
         $kategori = Kategori::all();
-
         return view('pengeluaran.index', compact('transaksi', 'barang', 'users', 'departemen', 'kategori'));
     }
 
     public function store(Request $request)
     {
-        $isAdmin = Auth::user()->role === 'A';
+        $isAdmin = Auth::user()->role === 'Admin';
 
         $validated = $request->validate([
             'tanggal_pengajuan' => 'required|date',
@@ -146,7 +145,7 @@ class PengeluaranController extends Controller
 
         return redirect()->route('pengeluaran.index')->with('success', '💸 Data pengeluaran berhasil diperbarui.');
     }
-    
+
 
     public function approve($id)
     {

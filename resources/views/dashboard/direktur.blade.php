@@ -1,25 +1,23 @@
 <x-app-layout>
-    <div class="min-h-screen bg-gradient-to-br from-white via-green-50 to-blue-50 py-12">
+    <div class="min-h-screen bg-gradient-to-br from-white via-blue-50 to-green-50 py-12">
         <div class="max-w-7xl mx-auto px-6 lg:px-8 space-y-10">
 
-            <!-- HEADER -->
+            <!-- Header -->
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
                 <div>
-                    <h1 class="text-3xl font-extrabold text-green-700 flex items-center gap-2">
-                        <i class="fi fi-rr-dashboard text-green-500"></i>
-                        Dashboard Admin Inventaris
+                    <h1 class="text-3xl font-extrabold text-blue-700 flex items-center gap-2">
+                        <i class="fi fi-rr-briefcase text-blue-500"></i>
+                        Dashboard Direktur
                     </h1>
-                    <p class="text-gray-500 text-sm">Ringkasan aktivitas & performa sistem inventaris</p>
+                    <p class="text-gray-500 text-sm">Ringkasan analitis & performa sistem inventaris</p>
                 </div>
-                <div class="mt-4 sm:mt-0 flex items-center gap-2">
+                <div class="mt-4 sm:mt-0">
                     <span
-                        class="px-4 py-1.5 bg-gradient-to-r from-green-500 to-emerald-400 text-white text-sm rounded-full font-semibold shadow-md">
+                        class="px-4 py-1.5 bg-gradient-to-r from-blue-500 to-indigo-400 text-white text-sm rounded-full font-semibold shadow-md">
                         {{ now()->format('F Y') }}
                     </span>
                 </div>
             </div>
-
-            <!-- STATISTIC CARDS -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                 <div
                     class="group bg-white p-6 rounded-2xl shadow-lg border border-transparent hover:border-green-300 transition-all relative overflow-hidden hover:-translate-y-1">
@@ -62,72 +60,34 @@
                 </div>
             </div>
 
-            <!-- Stok Rendah Alert -->
-            @if ($stokRendah > 0)
-                <div class="bg-red-100 border border-red-300 rounded-xl p-4 text-red-700 font-semibold">
-                    <i class="fi fi-rr-alert-triangle mr-2"></i>
-                    Ada {{ $stokRendah }} barang dengan stok rendah! Segera lakukan pengecekan.
-                </div>
-            @endif
-
-
             <!-- Grafik Tren -->
             <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
                 <h3 class="text-lg font-bold text-gray-800 mb-4">Grafik Pemasukan & Pengeluaran</h3>
                 <canvas id="chartDirektur" height="140"></canvas>
             </div>
 
-            <!-- Tabel Transaksi Terbaru -->
-            <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+            <!-- Transaksi Terbaru (Hanya Info) -->
+            <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
                 <h3 class="text-lg font-semibold mb-4">Transaksi Terbaru</h3>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 text-sm">
-                        <thead class="bg-green-50">
-                            <tr>
-                                <th class="px-4 py-2 text-left font-semibold text-green-700">Tanggal</th>
-                                <th class="px-4 py-2 text-left font-semibold text-green-700">Nama</th>
-                                <th class="px-4 py-2 text-left font-semibold text-green-700">Departemen</th>
-                                <th class="px-4 py-2 text-left font-semibold text-green-700">Jenis</th>
-                                <th class="px-4 py-2 text-left font-semibold text-green-700">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100">
-                            @forelse($transaksiTerbaru as $transaksi)
-                                <tr>
-                                    <td class="px-4 py-2">
-                                        @if($transaksi->status === 'pending')
-                                            {{ $transaksi->tanggal_pengajuan instanceof \Carbon\Carbon ? $transaksi->tanggal_pengajuan->format('d M Y') : $transaksi->tanggal_pengajuan }}
-                                        @else
-                                            {{ $transaksi->tanggal_approval instanceof \Carbon\Carbon ? $transaksi->tanggal_approval->format('d M Y') : $transaksi->tanggal_approval }}
-                                        @endif
-                                    </td>
-                                    <td class="px-4 py-2">{{ $transaksi->user->name ?? '-' }}</td>
-                                    <td class="px-4 py-2">{{ $transaksi->departemen->nama_departemen ?? '-' }}</td>
-                                    <td class="px-4 py-2 capitalize">{{ $transaksi->jenis }}</td>
-                                    <td class="px-4 py-2">
-                                        @if ($transaksi->status === 'pending')
-                                            <span
-                                                class="inline-block bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-semibold">Pending</span>
-                                        @elseif($transaksi->status === 'approved')
-                                            <span
-                                                class="inline-block bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold">Approved</span>
-                                        @else
-                                            <span
-                                                class="inline-block bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-semibold">Rejected</span>
-                                        @endif
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="5" class="px-4 py-6 text-center text-gray-400">Tidak ada transaksi
-                                        terbaru.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+                <ul class="divide-y divide-gray-200">
+                    @forelse($transaksiTerbaru as $transaksi)
+                        <li class="py-2 flex justify-between">
+                            <span>
+                                @if ($transaksi->status === 'pending')
+                                    {{ $transaksi->tanggal_pengajuan instanceof \Carbon\Carbon ? $transaksi->tanggal_pengajuan->format('d M Y') : $transaksi->tanggal_pengajuan }}
+                                @else
+                                    {{ $transaksi->tanggal_approval instanceof \Carbon\Carbon ? $transaksi->tanggal_approval->format('d M Y') : $transaksi->tanggal_approval }}
+                                @endif
+                                -
+                                {{ $transaksi->user->name }}
+                            </span>
+                            <span class="capitalize font-medium">{{ $transaksi->status }}</span>
+                        </li>
+                    @empty
+                        <li class="py-2 text-center text-gray-400">Tidak ada transaksi terbaru.</li>
+                    @endforelse
+                </ul>
             </div>
-
 
         </div>
     </div>

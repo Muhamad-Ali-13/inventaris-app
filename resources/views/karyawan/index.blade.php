@@ -54,6 +54,7 @@
                                 <th class="px-6 py-3">No Telp</th>
                                 <th class="px-6 py-3">Alamat</th>
                                 <th class="px-6 py-3">Tanggal Masuk</th>
+                                {{-- <th class="px-6 py-3">Role</th> --}}
                                 <th class="px-6 py-3 text-center">Aksi</th>
                             </tr>
                         </thead>
@@ -67,18 +68,33 @@
                                     <td class="px-6 py-3">{{ $k->no_telp ?? '-' }}</td>
                                     <td class="px-6 py-3">{{ $k->alamat ?? '-' }}</td>
                                     <td class="px-6 py-3">{{ $k->tanggal_masuk ?? '-' }}</td>
+                                    {{-- <td class="px-6 py-3">
+                                        @if ($k->user && $k->user->role === 'Admin')
+                                            <span class="text-xs bg-red-100 text-red-700 px-2 py-1 rounded">Admin</span>
+                                        @elseif ($k->user && $k->user->role === 'Direktur')
+                                            <span
+                                                class="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded">Direktur</span>
+                                        @elseif ($k->user && $k->user->role === 'Karyawan')
+                                            <span
+                                                class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">Karyawan</span>
+                                        @else
+                                            <span class="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">Tidak Ada
+                                                Akun</span>
+                                        @endif
+                                    </td> --}}
                                     <td class="px-6 py-3 text-center flex justify-center gap-2">
                                         <button type="button" class="text-blue-600 hover:text-blue-800"
                                             onclick="editKaryawanModal(this)" data-id="{{ $k->id }}"
                                             data-nip="{{ $k->nip }}" data-nama="{{ $k->nama_lengkap }}"
                                             data-departemen="{{ $k->departemen_id }}" data-telp="{{ $k->no_telp }}"
                                             data-alamat="{{ $k->alamat }}" data-tanggal="{{ $k->tanggal_masuk }}">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 inline"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M11 4h2m2 0h2a2 2 0 012 2v2m0 0v2m0-2h2m-2 0h-2m-2 0h-2m0 0V4m0 4H7m0 0H5m0 0H3m0 0V6a2 2 0 012-2h2m0 0h2m0 0v2" />
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                stroke-width="2" stroke="currentColor" class="w-5 h-5 inline">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
                                             </svg>
                                         </button>
+
                                         <form action="{{ route('karyawans.destroy', $k->id) }}" method="POST"
                                             onsubmit="return confirm('Yakin ingin menghapus data ini?')">
                                             @csrf @method('DELETE')
@@ -112,6 +128,20 @@
                                 <p><strong>No Telp:</strong> {{ $k->no_telp ?? '-' }}</p>
                                 <p><strong>Alamat:</strong> {{ $k->alamat ?? '-' }}</p>
                                 <p><strong>Tanggal Masuk:</strong> {{ $k->tanggal_masuk ?? '-' }}</p>
+                                <p><strong>Role:</strong>
+                                    @if ($k->user && $k->user->role === 'Admin')
+                                        <span class="text-xs bg-red-100 text-red-700 px-2 py-1 rounded">Admin</span>
+                                    @elseif ($k->user && $k->user->role === 'Direktur')
+                                        <span
+                                            class="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded">Direktur</span>
+                                    @elseif ($k->user && $k->user->role === 'Karyawan')
+                                        <span
+                                            class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">Karyawan</span>
+                                    @else
+                                        <span class="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">Tidak Ada
+                                            Akun</span>
+                                    @endif
+                                </p>
                             </div>
                             <div class="flex gap-2 mt-4">
                                 <button type="button" class="text-blue-600 hover:text-blue-800"
@@ -119,10 +149,10 @@
                                     data-nip="{{ $k->nip }}" data-nama="{{ $k->nama_lengkap }}"
                                     data-departemen="{{ $k->departemen_id }}" data-telp="{{ $k->no_telp }}"
                                     data-alamat="{{ $k->alamat }}" data-tanggal="{{ $k->tanggal_masuk }}">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 inline" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M11 4h2m2 0h2a2 2 0 012 2v2m0 0v2m0-2h2m-2 0h-2m-2 0h-2m0 0V4m0 4H7m0 0H5m0 0H3m0 0V6a2 2 0 012-2h2m0 0h2m0 0v2" />
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="2" stroke="currentColor" class="w-5 h-5 inline">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
                                     </svg>
                                 </button>
                                 <form action="{{ route('karyawans.destroy', $k->id) }}" method="POST"
@@ -258,6 +288,7 @@
             const telp = button.dataset.telp;
             const alamat = button.dataset.alamat;
             const tanggal = button.dataset.tanggal;
+            const role = button.dataset.role;
 
             let html = `
     <div id="editModal" class="fixed inset-0 flex items-center justify-center z-50">
@@ -307,6 +338,24 @@
             document.getElementById('editModalContainer').innerHTML = html;
         }
 
+        // <div>
+        //     <label class="block text-sm font-medium text-gray-600 mb-1">Role</label>
+        //     <select name="role"
+        //         class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500">
+        //         <option value="">--Pilih Role--</option>
+        // option value = "Admin"
+        // $ {
+        //     role === 'Admin' ? 'selected' : ''
+        // } > Admin < /option> <
+        // option value = "Direktur"
+        // $ {
+        //     role === 'Direktur' ? 'selected' : ''
+        // } > Direktur < /option> <
+        // option value = "Karyawan"
+        // $ {
+        //     role === 'Karyawan' ? 'selected' : ''
+        // } > Karyawan < /option> < /
+        //     select > < /div>
 
         // SEARCH, FILTER & ENTRIES
         document.addEventListener("DOMContentLoaded", () => {
