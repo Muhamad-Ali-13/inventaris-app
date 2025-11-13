@@ -13,12 +13,14 @@ return new class extends Migration
     {
         Schema::create('transaksi', function (Blueprint $table) {
             $table->id();
+            $table->string('kode_transaksi')->unique();
             $table->foreignId('user_id')->constrained('users');
             $table->foreignId('departemen_id')->nullable()->constrained('departemen')->nullOnDelete();
             $table->enum('jenis', ['pengeluaran', 'pemasukan']);
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->dateTime('tanggal_pengajuan');
-            $table->dateTime('tanggal_approval')->nullable();
+            $table->dateTime('tanggal_disetujui')->nullable();
+            $table->text('keterangan')->nullable();
             $table->timestamps();
         });
     }
@@ -26,7 +28,7 @@ return new class extends Migration
     /**
      * Reverse the migrations.
      */
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('transaksi');
     }

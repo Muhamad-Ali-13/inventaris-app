@@ -118,12 +118,30 @@
 
             {{-- LAPORAN: Admin + Direktur --}}
             @canany(['role-A', 'role-D'])
-                <a href="{{ route('laporan.index') }}"
-                    class="flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200
+                <div x-data="{ openLaporan: {{ request()->routeIs('laporan.*') ? 'true' : 'false' }} }">
+                    <button @click="openLaporan = !openLaporan"
+                        class="w-full flex items-center justify-between px-3 py-2 rounded-lg transition-all duration-200 hover:bg-green-50">
+                        <div class="flex items-center gap-3">
+                            <i class="fi fi-rr-document"></i>
+                            <span>Laporan</span>
+                        </div>
+                        <i :class="openLaporan ? 'fi fi-rr-angle-small-up' : 'fi fi-rr-angle-small-down'"></i>
+                    </button>
+                    <div x-show="openLaporan" x-transition class="pl-8 space-y-1 mt-1">
+                        <a href="{{ route('laporan.index') }}"
+                            class="flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-all duration-200
         {{ request()->routeIs('laporan.*') ? 'bg-green-100 font-semibold text-green-800 shadow-inner ring-2 ring-green-300' : 'hover:bg-green-50 hover:translate-x-1' }}">
-                    <i class="fi fi-rr-document"></i>
-                    <span>Laporan</span>
-                </a>
+                            <i class="fi fi-rr-box"></i>
+                            <span>Barang</span>
+                        </a>
+                        <a href="{{ route('laporan.akuntansi') }}"
+                            class="flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-all duration-200 {{ request()->routeIs('laporan.akuntansi*') ? 'bg-green-100 font-semibold text-green-800 shadow-inner ring-2 ring-green-300' : 'hover:bg-green-50 hover:translate-x-1' }}">
+                            <i class="fi fi-rr-chart-pie"></i>
+                            Akuntansi
+                        </a>
+
+                    </div>
+                </div>
             @endcanany
 
         </nav>

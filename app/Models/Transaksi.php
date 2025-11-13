@@ -11,14 +11,24 @@ class Transaksi extends Model
     protected $table = 'transaksi';
 
     protected $fillable = [
+        'kode_transaksi',
         'user_id',
         'departemen_id',
         'jenis',
         'status',
-        'deskripsi',
         'tanggal_pengajuan',
-        'tanggal_approval',
+        'tanggal_disetujui',
+        'keterangan',
     ];
+
+    public static function generateKode($jenis)
+    {
+        $prefix = $jenis === 'pemasukan' ? 'PMK' : 'PLR';
+        $last = self::where('jenis', $jenis)->latest()->first();
+        $next = $last ? ((int) substr($last->kode_transaksi, -4)) + 1 : 1;
+        return $prefix . '-' . str_pad($next, 4, '0', STR_PAD_LEFT);
+    }
+
 
     public function user()
     {
@@ -32,6 +42,11 @@ class Transaksi extends Model
 
     public function details()
     {
-        return $this->hasMany(TransaksiDetail::class);
+        return $this->hasMany(TransaksiDetail::class, 'kode_transaksi', 'kode_transaksi');
+    }
+
+    public function barang()
+    {
+        return $this->belongsTo(Barang::class, 'kode_barang', 'kode_barang');
     }
 }

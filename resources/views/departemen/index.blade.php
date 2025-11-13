@@ -50,6 +50,7 @@
                             <tr>
                                 <th class="px-6 py-3">No</th>
                                 <th class="px-6 py-3">Nama Departemen</th>
+                                <th class="px-6 py-3">Deskripsi</th>
                                 @can('role-A')
                                     <th class="px-6 py-3 text-center">Aksi</th>
                                 @endcan
@@ -60,11 +61,12 @@
                                 <tr class="border-b hover:bg-green-50 transition">
                                     <td class="px-6 py-3">{{ $index + 1 }}</td>
                                     <td class="px-6 py-3 font-medium text-gray-800">{{ $d->nama_departemen }}</td>
+                                    <td class="px-6 py-3">{{ $d->deskripsi }}</td>
                                     @can('role-A')
                                         <td class="px-6 py-3 text-center flex justify-center gap-2">
                                             <button class="text-blue-600 hover:text-blue-800"
                                                 onclick="editDepartemenModal(this)" data-id="{{ $d->id }}"
-                                                data-nama="{{ $d->nama_departemen }}">
+                                                data-nama="{{ $d->nama_departemen }}" data-deskripsi="{{ $d->deskripsi }}">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                     stroke-width="2" stroke="currentColor" class="w-5 h-5 inline">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -99,10 +101,11 @@
                             <div class="flex justify-between items-center mb-2">
                                 <h4 class="font-semibold text-lg text-gray-800">{{ $d->nama_departemen }}</h4>
                             </div>
-                            @can('role-A')
+                            @can('role-Admin')
                                 <div class="flex gap-2 mt-4">
                                     <button class="text-blue-600 hover:text-blue-800" onclick="editDepartemenModal(this)"
-                                        data-id="{{ $d->id }}" data-nama="{{ $d->nama_departemen }}">
+                                        data-id="{{ $d->id }}" data-nama="{{ $d->nama_departemen }}"
+                                        data-deskripsi="{{ $d->deskripsi }}">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="2" stroke="currentColor" class="w-5 h-5 inline">
                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -149,6 +152,13 @@
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-800 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
                         required>
                 </div>
+                <div class="mb-4">
+                    <label for="deskripsi" class="block text-sm font-medium text-gray-700 mb-1">
+                        Deskripsi
+                    </label>
+                    <textarea name="deskripsi" id="deskripsi" rows="3" placeholder="Deskripsi singkat tentang departemen"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-800 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"></textarea>
+                </div>
                 <div class="flex justify-end gap-2 mt-4">
                     <button type="button" onclick="closeModal('departemenCreateModal')"
                         class="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition">Batal</button>
@@ -194,6 +204,10 @@
                     class="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-800 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
                     required>
                 <p id="editErrors" class="mt-2 text-sm text-red-600 hidden"></p>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
+                <textarea name="deskripsi" value="${escapeHtml(deskripsi)}" rows="3" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-800 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none">${escapeHtml(deskripsi)}</textarea>
             </div>
             <div class="flex justify-end gap-2 mt-4">
                 <button type="button" onclick="closeModal('departemenModal')"

@@ -20,7 +20,10 @@ class DepartemenController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate(['nama_departemen' => 'required|string|max:255']);
+        $request->validate([
+            'nama_departemen' => 'required|string|max:255',
+            'deskripsi' => 'nullable|string',
+        ]);
         Departemen::create($request->all());
         return redirect()->route('departemen.index')->with('success', 'Departemen berhasil ditambahkan');
     }
@@ -34,11 +37,13 @@ class DepartemenController extends Controller
     {
         $request->validate([
             'nama_departemen' => 'required|string|max:255',
+            'deskripsi' => 'nullable|string',
         ]);
 
         $departemen = Departemen::findOrFail($id);
         $departemen->update([
             'nama_departemen' => $request->nama_departemen,
+            'deskripsi' => $request->deskripsi,
         ]);
 
         // Jika request via AJAX, kirim JSON
@@ -46,6 +51,7 @@ class DepartemenController extends Controller
             return response()->json([
                 'success' => true,
                 'nama_departemen' => $departemen->nama_departemen,
+                'deskripsi' => $departemen->deskripsi,
                 'id' => $departemen->id,
             ]);
         }

@@ -25,9 +25,16 @@ class TransaksiDetailController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'transaksi_id' => 'required|exists:transaksi,id',
-            'barang_id' => 'required|exists:barang,id',
+            'kode_transaksi' => 'required|exists:transaksi,id',
+            'kode_barang' => 'required|exists:barang,id',
+            'harga' => ['required', 'numeric', function ($attribute, $value, $fail) use ($request) {
+                $barang = Barang::find($request->kode_barang);
+                if ($barang && $value != $barang->harga) {
+                    $fail('Harga harus sesuai dengan harga barang');
+                }
+            }],
             'jumlah' => 'required|integer|min:1',
+            'total' => 'required|numeric',
         ]);
 
         TransaksiDetail::create($request->all());
@@ -46,9 +53,16 @@ class TransaksiDetailController extends Controller
     public function update(Request $request, TransaksiDetail $transaksidetail)
     {
         $request->validate([
-            'transaksi_id' => 'required|exists:transaksi,id',
-            'barang_id' => 'required|exists:barang,id',
+            'kode_transaksi' => 'required|exists:transaksi,id',
+            'kode_barang' => 'required|exists:barang,id',
+            'harga' => ['required', 'numeric', function ($attribute, $value, $fail) use ($request) {
+                $barang = Barang::find($request->kode_barang);
+                if ($barang && $value != $barang->harga) {
+                    $fail('Harga harus sesuai dengan harga barang');
+                }
+            }],
             'jumlah' => 'required|integer|min:1',
+            'total' => 'required|numeric',
         ]);
 
         $transaksidetail->update($request->all());

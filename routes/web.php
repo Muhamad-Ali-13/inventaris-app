@@ -55,7 +55,7 @@ Route::middleware(['auth', 'throttle:60,1'])->group(function () {
         Route::controller(PengeluaranController::class)->group(function () {
             Route::get('/pengeluaran', 'index')->name('pengeluaran.index');
             Route::post('/pengeluaran/store', 'store')->name('pengeluaran.store');
-            Route::put('/pengeluaran/{id}', 'update')->name('pengeluaran.update');
+            Route::put('/pengeluaran/{id}', [PengeluaranController::class, 'update'])->name('pengeluaran.update');
             Route::post('/pengeluaran/{id}/approve', 'approve')->name('pengeluaran.approve');
             Route::post('/pengeluaran/{id}/reject', 'reject')->name('pengeluaran.reject');
             Route::get('/pengeluaran/{id}/edit-data', 'getEditData');
@@ -84,6 +84,10 @@ Route::middleware(['auth', 'throttle:60,1'])->group(function () {
         Route::get('laporan', [LaporanController::class, 'index'])->name('laporan.index');
         Route::get('laporan/pdf', [LaporanController::class, 'exportPdf'])->name('laporan.exportPdf');
         Route::get('laporan/excel', [LaporanController::class, 'exportExcel'])->name('laporan.exportExcel');
+        Route::get('/laporan/akuntansi', [LaporanController::class, 'akuntansiIndex'])->name('laporan.akuntansi');
+        
+        Route::get('/laporan/akuntansi/export-pdf', [LaporanController::class, 'akuntansiExportPdf'])->name('laporan.akuntansi.exportPdf');
+        Route::get('/laporan/akuntansi/export-excel', [LaporanController::class, 'akuntansiExportExcel'])->name('laporan.akuntansi.exportExcel');
     });
 
     // ----------------------

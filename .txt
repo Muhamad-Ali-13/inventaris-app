@@ -1,0 +1,3 @@
+tambah kode barang + harga barang
+lalu yang nambah pngeluar dan nambah lagi melebihi stok nanti pas approve kedua eror nya muncul pop up jangan eror default
+dan nanti di dashboard admin dan direktur muncul karyawan ini selama sebulan pengeluaran barang nya berapa dan total harga nya berapa

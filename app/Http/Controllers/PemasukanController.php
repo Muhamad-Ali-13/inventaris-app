@@ -39,26 +39,34 @@ class PemasukanController extends Controller
         })->orderBy('tanggal_pengajuan', 'desc')
             ->paginate($entries);
 
-        $barang = Barang::all(); // bisa termasuk stok = 0
+        $barang = Barang::all(); // bisa termasuk qty = 0
         $departemen = Departemen::all();
         $users = User::all();
         $kategori = Kategori::all();
+        $kodeTransaksi = Transaksi::generateKode('pemasukan');
 
-        return view('pemasukan.index', compact('transaksi', 'barang', 'users', 'departemen', 'kategori'));
+        return view('pemasukan.index', compact('transaksi', 'barang', 'users', 'departemen', 'kategori', 'kodeTransaksi'));
     }
 
     public function store(Request $request)
     {
         $isAdmin = Auth::user()->role === 'Admin';
 
+        // === VALIDASI INPUT ===
         $validated = $request->validate([
             'tanggal_pengajuan' => 'required|date',
-            'barang_id' => 'required|array',
+            'barang_id' => 'required|array|min:1',
             'barang_id.*' => 'exists:barang,id',
-            'barang_jumlah' => 'required|array',
+            'barang_jumlah' => 'required|array|min:1',
             'barang_jumlah.*' => 'integer|min:1',
         ]);
 
+        // Pastikan jumlah barang_id dan barang_jumlah sama
+        if (count($validated['barang_id']) !== count($validated['barang_jumlah'])) {
+            return back()->with('error', 'Jumlah barang dan jumlah yang dimasukkan tidak sesuai.');
+        }
+
+        // === AMBIL DEPARTEMEN UNTUK NON-ADMIN ===
         $departemenId = null;
         if (!$isAdmin) {
             $karyawan = Karyawan::where('user_id', Auth::id())->first();
@@ -68,8 +76,15 @@ class PemasukanController extends Controller
             $departemenId = $karyawan->departemen_id;
         }
 
+        // === TRANSAKSI DATABASE ===
         DB::transaction(function () use ($validated, $departemenId) {
+
+            // === GENERATE KODE TRANSAKSI OTOMATIS ===
+            $kodeTransaksi = Transaksi::generateKode('pemasukan');
+
+            // === SIMPAN TRANSAKSI UTAMA ===
             $transaksi = Transaksi::create([
+                'kode_transaksi' => $kodeTransaksi,
                 'user_id' => Auth::id(),
                 'departemen_id' => $departemenId,
                 'jenis' => 'pemasukan',
@@ -77,17 +92,28 @@ class PemasukanController extends Controller
                 'tanggal_pengajuan' => $validated['tanggal_pengajuan'],
             ]);
 
+            // === SIMPAN DETAIL TRANSAKSI ===
             foreach ($validated['barang_id'] as $i => $barangId) {
+
+                $barang = Barang::find($barangId);
+
+                if (!$barang) {
+                    throw new \Exception("Barang dengan ID $barangId tidak ditemukan.");
+                }
+
+                // SIMPAN DETAIL (belum update stok)
                 TransaksiDetail::create([
-                    'transaksi_id' => $transaksi->id,
-                    'barang_id' => $barangId,
+                    'kode_transaksi' => $transaksi->kode_transaksi,
+                    'kode_barang' => $barang->kode_barang,
+                    'harga' => $barang->harga_beli,
                     'jumlah' => $validated['barang_jumlah'][$i],
+                    'total' => $barang->harga_beli * $validated['barang_jumlah'][$i],
                 ]);
             }
         });
 
         return redirect()->route('pemasukan.index')
-            ->with('success', '✅ Data pemasukan berhasil ditambahkan (menunggu approval).');
+            ->with('success', 'Data pemasukan berhasil ditambahkan (menunggu approval).');
     }
 
 
@@ -95,46 +121,39 @@ class PemasukanController extends Controller
     {
         $transaksi = Transaksi::with('details')->findOrFail($id);
 
+        // Pastikan status pending
         if ($transaksi->status !== 'pending') {
             return back()->with('error', 'Transaksi sudah diproses dan tidak bisa diubah.');
         }
 
-        if (Auth::user()->role !== 'A' && $transaksi->user_id !== Auth::id()) {
-            return back()->with('error', 'Tidak memiliki izin mengubah transaksi ini.');
-        }
-
-        $isAdmin = Auth::user()->role === 'A';
-
+        // Validasi input
         $validated = $request->validate([
             'tanggal_pengajuan' => 'required|date',
-            'barang_id' => 'required|array',
-            'barang_id.*' => 'required|exists:barang,id',
-            'barang_jumlah' => 'required|array',
-            'barang_jumlah.*' => 'required|integer|min:1',
+            'barang_id' => 'required|array|min:1',
+            'barang_id.*' => 'exists:barang,id',
+            'barang_jumlah' => 'required|array|min:1',
+            'barang_jumlah.*' => 'integer|min:1',
         ]);
 
-        $departemenId = $transaksi->departemen_id;
-        if (!$isAdmin) {
-            $karyawan = Karyawan::where('user_id', Auth::id())->first();
-            if (!$karyawan) {
-                return back()->with('error', 'Data karyawan untuk user ini tidak ditemukan.');
-            }
-            $departemenId = $karyawan->departemen_id;
-        }
-
-        DB::transaction(function () use ($transaksi, $validated, $departemenId) {
+        DB::transaction(function () use ($transaksi, $validated) {
+            // Update transaksi
             $transaksi->update([
                 'tanggal_pengajuan' => $validated['tanggal_pengajuan'],
-                'departemen_id' => $departemenId,
             ]);
 
+            // Hapus detail lama
             $transaksi->details()->delete();
 
-            foreach ($validated['barang_id'] as $i => $barangId) {
+            // Simpan detail baru
+            foreach ($validated['barang_id'] as $index => $barangId) {
+                $barang = Barang::findOrFail($barangId);
+
                 TransaksiDetail::create([
-                    'transaksi_id' => $transaksi->id,
-                    'barang_id' => $barangId,
-                    'jumlah' => $validated['barang_jumlah'][$i],
+                    'kode_transaksi' => $transaksi->kode_transaksi,
+                    'kode_barang' => $barang->kode_barang,
+                    'harga' => $barang->harga_beli,
+                    'jumlah' => $validated['barang_jumlah'][$index],
+                    'total' => $barang->harga_beli * $validated['barang_jumlah'][$index],
                 ]);
             }
         });
@@ -152,18 +171,30 @@ class PemasukanController extends Controller
         }
 
         DB::transaction(function () use ($transaksi) {
+
             $transaksi->update([
                 'status' => 'approved',
-                'tanggal_approval' => Carbon::now(),
+                'tanggal_disetujui' => Carbon::now(),
             ]);
 
             foreach ($transaksi->details as $detail) {
-                $detail->barang->increment('stok', $detail->jumlah);
+                $barang = $detail->barang;
+
+                if (!$barang) continue;
+
+                // Tambah stok setelah APPROVE
+                $barang->qty += $detail->jumlah;
+
+                // Update total harga
+                $barang->total_harga = $barang->qty * $barang->harga_beli;
+
+                $barang->save();
             }
         });
 
-        return back()->with('success', '✅ Pemasukan disetujui dan stok barang ditambahkan.');
+        return back()->with('success', '✅ Pemasukan disetujui dan qty + total harga diperbarui.');
     }
+
 
     public function reject($id)
     {
@@ -175,10 +206,10 @@ class PemasukanController extends Controller
 
         $transaksi->update([
             'status' => 'rejected',
-            'tanggal_approval' => Carbon::now(),
+            'tanggal_disetujui' => Carbon::now(),
         ]);
 
-        return back()->with('success', '❌ Pemasukan ditolak (stok tidak berubah).');
+        return back()->with('success', '❌ Pemasukan ditolak (qty tidak berubah).');
     }
 
     public function destroy($id)
@@ -188,7 +219,17 @@ class PemasukanController extends Controller
 
             if ($transaksi->status === 'approved') {
                 foreach ($transaksi->details as $detail) {
-                    $detail->barang->decrement('stok', $detail->jumlah);
+                    $barang = $detail->barang;
+
+                    if (!$barang) continue;
+
+                    // Kurangi stok
+                    $barang->qty = max(0, $barang->qty - $detail->jumlah);
+
+                    // Hitung ulang total harga
+                    $barang->total_harga = $barang->qty * $barang->harga_beli;
+
+                    $barang->save();
                 }
             }
 
@@ -196,6 +237,7 @@ class PemasukanController extends Controller
             $transaksi->delete();
         });
 
-        return redirect()->route('pemasukan.index')->with('success', '🗑️ Data pemasukan dihapus dan stok diperbarui.');
+        return redirect()->route('pemasukan.index')
+            ->with('success', '🗑️ Data pemasukan dihapus dan stok + total harga diperbarui.');
     }
 }

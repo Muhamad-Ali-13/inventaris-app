@@ -13,12 +13,18 @@ return new class extends Migration
     {
         Schema::create('barang', function (Blueprint $table) {
             $table->id();
-            $table->string('nama_barang');
+            $table->string('kode_barang')->unique();
+            $table->date('tanggal_masuk');
+            $table->string('nama_barang')->index();
             $table->foreignId('kategori_id')->constrained('kategori')->onDelete('cascade');
-            $table->integer('stok')->default(0);
-            $table->string('satuan');
+            $table->bigInteger('harga_beli')->default(0);
+            $table->unsignedInteger('qty')->default(0);
+            $table->bigInteger('total_harga')->default(0); 
+            $table->enum('satuan', ['pcs', 'box', 'unit', 'kg', 'liter', 'rim']);
             $table->text('keterangan')->nullable();
+
             $table->timestamps();
+            $table->softDeletes(); 
         });
     }
 

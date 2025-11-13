@@ -116,7 +116,7 @@
                             </div>
 
                             <p class="text-sm text-gray-500 mt-1">
-                                {{ $trx->tanggal_approval ? \Carbon\Carbon::parse($trx->tanggal_approval)->format('d M Y') : '-' }}
+                                {{ $trx->tanggal_disetujui ? \Carbon\Carbon::parse($trx->tanggal_approval)->format('d M Y') : '-' }}
                             </p>
 
                             <div class="mt-3 space-y-1">
@@ -162,7 +162,7 @@
                                 <tr class="hover:bg-green-50 transition">
                                     <td class="px-4 py-2 text-sm text-gray-700">{{ $loop->iteration }}</td>
                                     <td class="px-4 py-2 text-sm text-gray-700">
-                                        {{ $trx->tanggal_approval ? \Carbon\Carbon::parse($trx->tanggal_approval)->format('d-m-Y') : '-' }}
+                                        {{ $trx->tanggal_disetujui ? \Carbon\Carbon::parse($trx->tanggal_approval)->format('d-m-Y') : '-' }}
                                     </td>
                                     <td class="px-4 py-2 text-sm text-gray-700">
                                         {{ $trx->user->name ?? 'ADMIN' }}
@@ -175,7 +175,7 @@
                                     </td>
                                     <td class="px-4 py-2 text-sm text-gray-700">
                                         @foreach ($trx->details as $detail)
-                                            {{ $detail->barang->nama_barang }} <br>
+                                            {{ $detail->barang->nama_barang }}[{{ $detail->jumlah }}{{ $detail->barang->satuan }}]<br>
                                         @endforeach
                                     </td>
                                     <td class="px-4 py-2 text-sm text-gray-700">

@@ -208,7 +208,7 @@ class TransaksiController extends Controller
 
         DB::transaction(function () use ($transaksi) {
             $transaksi->status = 'approved';
-            $transaksi->tanggal_approval = Carbon::now();
+            $transaksi->tanggal_disetujui = Carbon::now();
             $transaksi->save();
 
             foreach ($transaksi->details as $detail) {
@@ -243,7 +243,7 @@ class TransaksiController extends Controller
 
         $transaksi->update([
             'status' => 'rejected',
-            'tanggal_approval' => Carbon::now(),
+            'tanggal_disetujui' => Carbon::now(),
         ]);
 
         return back()->with('success', 'Transaksi berhasil ditolak (stok tidak berubah).');

@@ -53,6 +53,7 @@
                         <thead class="bg-green-100 text-green-800 uppercase text-xs">
                             <tr>
                                 <th class="px-6 py-3">No</th>
+                                <th class="px-6 py-3">Kode Barang</th>
                                 <th class="px-6 py-3">Nama Barang</th>
                                 <th class="px-6 py-3">Kategori</th>
                                 <th class="px-6 py-3">Stok</th>
@@ -63,11 +64,12 @@
                             @foreach ($barang as $index => $b)
                                 <tr class="border-b hover:bg-green-50 transition">
                                     <td class="px-6 py-3">{{ $index + 1 }}</td>
+                                    <td class="px-6 py-3">{{ $b->kode_barang }}</td>
                                     <td class="px-6 py-3 font-medium text-gray-800">{{ $b->nama_barang }}</td>
                                     <td class="px-6 py-3">{{ $b->kategori->nama_kategori }}</td>
                                     <td
-                                        class="px-6 py-3 {{ $b->stok == 0 ? 'text-red-600 font-semibold' : 'text-gray-800' }}">
-                                        {{ $b->stok }}</td>
+                                        class="px-6 py-3 {{ $b->qty == 0 ? 'text-red-600 font-semibold' : 'text-gray-800' }}">
+                                        {{ $b->qty }}</td>
                                     <td class="px-6 py-3">{{ $b->satuan }}</td>
                                 </tr>
                             @endforeach

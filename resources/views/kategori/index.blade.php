@@ -49,6 +49,7 @@
                             <tr>
                                 <th class="px-6 py-3 text-center">No</th>
                                 <th class="px-6 py-3">Nama Kategori</th>
+                                <th class="px-6 py-3">Keterangan</th>
                                 <th class="px-6 py-3 text-center">Aksi</th>
                             </tr>
                         </thead>
@@ -57,10 +58,11 @@
                                 <tr class="border-b hover:bg-green-50 transition">
                                     <td class="px-6 py-3 text-center">{{ $index + 1 }}</td>
                                     <td class="px-6 py-3 font-medium text-gray-800">{{ $k->nama_kategori }}</td>
+                                    <td class="px-6 py-3 ">{{ $k->keterangan }}</td>
                                     <td class="px-6 py-3 text-center flex justify-center gap-2">
                                         <button onclick="editKategoriModal(this)" data-id="{{ $k->id }}"
-                                            data-nama="{{ $k->nama_kategori }}" title="Edit"
-                                            class="text-blue-600 hover:text-blue-800">
+                                            data-nama="{{ $k->nama_kategori }}" data-keterangan="{{ $k->keterangan }}"
+                                            title="Edit" class="text-blue-600 hover:text-blue-800">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                 stroke-width="2" stroke="currentColor" class="w-5 h-5 inline">
                                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -96,8 +98,8 @@
                             </div>
                             <div class="flex gap-2 mt-2">
                                 <button onclick="editKategoriModal(this)" data-id="{{ $k->id }}"
-                                    data-nama="{{ $k->nama_kategori }}" title="Edit"
-                                    class="text-blue-600 hover:text-blue-800">
+                                    data-nama="{{ $k->nama_kategori }}" data-keterangan="{{ $k->keterangan }}"
+                                    title="Edit" class="text-blue-600 hover:text-blue-800">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                         stroke-width="2" stroke="currentColor" class="w-5 h-5 inline">
                                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -140,6 +142,11 @@
                     <input type="text" name="nama_kategori" id="nama_kategori" required placeholder="Contoh: ATK"
                         class="w-full border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500 rounded-lg px-3 py-2 text-gray-800 placeholder-gray-400 transition duration-200" />
                 </div>
+                <div>
+                    <label for="keterangan" class="block text-sm font-medium text-gray-600 mb-1">Keterangan</label>
+                    <textarea name="keterangan" id="keterangan" rows="3" placeholder="Contoh: Keterangan tambahan tentang kategori"
+                        class="w-full border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500 rounded-lg px-3 py-2 text-gray-800 placeholder-gray-400 transition duration-200"></textarea>
+                </div>
                 <div class="flex justify-end gap-3 pt-3 border-t">
                     <button type="button" onclick="tambahKategoriModalClose()"
                         class="bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium px-5 py-2 rounded-lg">Batal</button>
@@ -167,6 +174,12 @@
                     <input type="text" name="nama_kategori" id="edit_nama_kategori" required
                         class="w-full border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500 rounded-lg px-3 py-2 text-gray-800 transition duration-200" />
                 </div>
+                <div>
+                    <label for="edit_keterangan"
+                        class="block text-sm font-medium text-gray-600 mb-1">Keterangan</label>
+                    <textarea name="keterangan" id="edit_keterangan" rows="3"
+                        class="w-full border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500 rounded-lg px-3 py-2 text-gray-800 transition duration-200"></textarea>
+                </div>
                 <div class="flex justify-end gap-3 pt-3 border-t">
                     <button type="button" onclick="kategoriModalClose()"
                         class="bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium px-5 py-2 rounded-lg">Batal</button>
@@ -191,11 +204,12 @@
         function editKategoriModal(button) {
             const id = button.dataset.id;
             const nama = button.dataset.nama;
+            const keterangan = button.dataset.keterangan;
 
             document.getElementById('formKategoriModal').setAttribute('action', "{{ route('kategori.update', ':id') }}"
                 .replace(':id', id));
             document.getElementById('edit_nama_kategori').value = nama;
-
+            document.getElementById('edit_keterangan').value = keterangan;
             document.getElementById('kategoriModal').classList.remove('hidden');
         }
 

@@ -12,10 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('departemen', function (Blueprint $table) {
-            $table->id();
-            $table->string('nama_departemen');
-            $table->text('keterangan')->nullable();
+            $table->id();     // opsional, tapi bagus
+            $table->string('nama_departemen')->unique();      // agar tidak duplikat
+            $table->text('deskripsi')->nullable();
+
             $table->timestamps();
+            $table->index('nama_departemen');                 // mempercepat query
         });
     }
 
