@@ -1,4 +1,5 @@
 <x-guest-layout>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <div
         class="w-full flex flex-col md:flex-row items-center justify-center bg-gradient-to-br from-green-50 via-white to-green-100 px-4 sm:px-6 py-10">
         <!-- Form Login -->

@@ -164,5 +164,5 @@
         <div class="nama">{{ Auth::user()->name ?? 'User' }}</div>
     </div>
 </body>
-
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </html>

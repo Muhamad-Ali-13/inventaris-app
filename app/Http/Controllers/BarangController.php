@@ -8,25 +8,87 @@ use Illuminate\Http\Request;
 
 class BarangController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $barang = Barang::with('kategori')->paginate(10);
+        $entries = $request->get('entries', 10);
+        $search = $request->get('search');
+        $kategoriFilter = $request->get('kategori_id');
+
+        // Ambil parameter sorting, default ke 'nama_barang' dan 'asc'
+        $sortBy = $request->get('sort_by', 'nama_barang');
+        $order = $request->get('order', 'asc');
+
+        // Query dasar dengan relasi kategori
+        $query = Barang::with('kategori');
+
+        // Filter berdasarkan search
+        if ($search) {
+            $query->where('nama_barang', 'like', '%' . $search . '%')
+                ->orWhere('kode_barang', 'like', '%' . $search . '%');
+        }
+
+        // Filter berdasarkan kategori
+        if ($kategoriFilter) {
+            $query->where('kategori_id', $kategoriFilter);
+        }
+
+        // Terapkan pengurutan
+        $query->orderBy($sortBy, $order);
+
+        // Jalankan query dengan pagination
+        $barang = $query->paginate($entries);
+
+        // Tambahkan semua parameter query ke link pagination
+        $barang->appends($request->query());
+
         $kategori = Kategori::all();
         $kodeBaru = Barang::generateKode();
+
         return view('barang.index', compact('barang', 'kategori', 'kodeBaru'));
     }
 
-    public function stok()
+    public function stok(Request $request)
     {
-        $barang = Barang::with('kategori')->get();
+        $entries = $request->get('entries', 10);
+        $search = $request->get('search');
+        $kategoriFilter = $request->get('kategori_id');
+
+        // Ambil parameter sorting, default ke 'nama_barang' dan 'asc'
+        $sortBy = $request->get('sort_by', 'nama_barang');
+        $order = $request->get('order', 'asc');
+
+        // Query dasar dengan relasi kategori
+        $query = Barang::with('kategori');
+
+        // Filter berdasarkan search
+        if ($search) {
+            $query->where('nama_barang', 'like', '%' . $search . '%')
+                ->orWhere('kode_barang', 'like', '%' . $search . '%');
+        }
+
+        // Filter berdasarkan kategori
+        if ($kategoriFilter) {
+            $query->where('kategori_id', $kategoriFilter);
+        }
+
+        // Terapkan pengurutan
+        $query->orderBy($sortBy, $order);
+
+        // Jalankan query dengan pagination
+        $barang = $query->paginate($entries);
+
+        // Tambahkan semua parameter query ke link pagination
+        $barang->appends($request->query());
+
         $kategori = Kategori::all();
-        return view('barang.stok', compact('barang', 'kategori'));
+        $kodeBaru = Barang::generateKode();
+        return view('barang.stok', compact('barang', 'kategori', 'kodeBaru'));
     }
 
     public function create()
     {
         $kategori = Kategori::all();
-        return view('barang.create', compact('kategori', ));
+        return view('barang.create', compact('kategori',));
     }
 
     public function store(Request $request)

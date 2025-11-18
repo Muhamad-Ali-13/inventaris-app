@@ -62,8 +62,8 @@ class TransaksiController extends Controller
             'tanggal_pengajuan' => 'required|date',
             'barang_id' => 'required|array',
             'barang_id.*' => 'required|exists:barang,id',
-            'barang_jumlah' => 'required|array',
-            'barang_jumlah.*' => 'required|integer|min:1',
+            'barang_qty' => 'required|array',
+            'barang_qty.*' => 'required|integer|min:1',
         ]);
 
         // ✅ Jika admin: departemen_id boleh null
@@ -87,8 +87,8 @@ class TransaksiController extends Controller
                 return back()->withErrors(['barang' => "Barang {$barang->nama_barang} stoknya habis, tidak bisa dipilih."]);
             }
 
-            if ($request->barang_jumlah[$index] > $barang->stok && ($validated['tipe'] ?? 'pengeluaran') === 'pengeluaran') {
-                return back()->withErrors(['barang' => "Jumlah melebihi stok untuk {$barang->nama_barang}."]);
+            if ($request->barang_qty[$index] > $barang->stok && ($validated['tipe'] ?? 'pengeluaran') === 'pengeluaran') {
+                return back()->withErrors(['barang' => "qty melebihi stok untuk {$barang->nama_barang}."]);
             }
         }
 
@@ -108,16 +108,16 @@ class TransaksiController extends Controller
                 $barang = Barang::findOrFail($barangId);
 
                 // Validasi stok barang sebelum simpan
-                if ($validated['barang_jumlah'][$i] > $barang->stok) {
-                    $errors = ['barang' => "Jumlah melebihi stok untuk {$barang->nama_barang}."];
-                    $errors['stok'] = "Stok barang {$barang->nama_barang} tersedia sejumlah {$barang->stok}.";
+                if ($validated['barang_qty'][$i] > $barang->stok) {
+                    $errors = ['barang' => "qty melebihi stok untuk {$barang->nama_barang}."];
+                    $errors['stok'] = "Stok barang {$barang->nama_barang} tersedia seqty {$barang->stok}.";
                     return back()->withErrors($errors);
                 }
 
                 TransaksiDetail::create([
                     'transaksi_id' => $transaksi->id,
                     'barang_id' => $barangId,
-                    'jumlah' => $validated['barang_jumlah'][$i],
+                    'qty' => $validated['barang_qty'][$i],
                 ]);
             }
         });
@@ -134,8 +134,8 @@ class TransaksiController extends Controller
             'tanggal_pengajuan' => 'required|date',
             'barang_id' => 'required|array',
             'barang_id.*' => 'required|exists:barang,id',
-            'barang_jumlah' => 'required|array',
-            'barang_jumlah.*' => 'required|integer|min:1',
+            'barang_qty' => 'required|array',
+            'barang_qty.*' => 'required|integer|min:1',
         ]);
 
         // ✅ Jika admin: departemen_id boleh null
@@ -159,8 +159,8 @@ class TransaksiController extends Controller
                 return back()->withErrors(['barang' => "Barang {$barang->nama_barang} stoknya habis, tidak bisa dipilih."]);
             }
 
-            if ($request->barang_jumlah[$index] > $barang->stok && ($validated['tipe'] ?? 'pengeluaran') === 'pengeluaran') {
-                return back()->withErrors(['barang' => "Jumlah melebihi stok untuk {$barang->nama_barang}."]);
+            if ($request->barang_qty[$index] > $barang->stok && ($validated['tipe'] ?? 'pengeluaran') === 'pengeluaran') {
+                return back()->withErrors(['barang' => "qty melebihi stok untuk {$barang->nama_barang}."]);
             }
         }
 
@@ -181,16 +181,16 @@ class TransaksiController extends Controller
                 $barang = Barang::findOrFail($barangId);
 
                 // Validasi stok barang sebelum simpan
-                if ($validated['barang_jumlah'][$i] > $barang->stok) {
-                    $errors = ['barang' => "Jumlah melebihi stok untuk {$barang->nama_barang}."];
-                    $errors['stok'] = "Stok barang {$barang->nama_barang} tersedia sejumlah {$barang->stok}.";
+                if ($validated['barang_qty'][$i] > $barang->stok) {
+                    $errors = ['barang' => "qty melebihi stok untuk {$barang->nama_barang}."];
+                    $errors['stok'] = "Stok barang {$barang->nama_barang} tersedia seqty {$barang->stok}.";
                     return back()->withErrors($errors);
                 }
 
                 TransaksiDetail::create([
                     'transaksi_id' => $transaksi->id,
                     'barang_id' => $barangId,
-                    'jumlah' => $validated['barang_jumlah'][$i],
+                    'qty' => $validated['barang_qty'][$i],
                 ]);
             }
         });
@@ -216,13 +216,13 @@ class TransaksiController extends Controller
 
                 if ($transaksi->jenis === 'pengeluaran') {
                     // Kurangi stok saat disetujui
-                    if ($barang->stok < $detail->jumlah) {
+                    if ($barang->stok < $detail->qty) {
                         throw new \Exception("Stok tidak cukup untuk {$barang->nama_barang}");
                     }
-                    $barang->decrement('stok', $detail->jumlah);
+                    $barang->decrement('stok', $detail->qty);
                 } elseif ($transaksi->jenis === 'pemasukan') {
                     // Tambah stok saat disetujui
-                    $barang->increment('stok', $detail->jumlah);
+                    $barang->increment('stok', $detail->qty);
                 }
 
                 // // Add debug statements to check if the stock is being updated correctly
@@ -260,9 +260,9 @@ class TransaksiController extends Controller
                     $barang = $detail->barang;
 
                     if ($transaksi->jenis === 'pengeluaran') {
-                        $barang->increment('stok', $detail->jumlah);
+                        $barang->increment('stok', $detail->qty);
                     } elseif ($transaksi->jenis === 'pemasukan') {
-                        $barang->decrement('stok', $detail->jumlah);
+                        $barang->decrement('stok', $detail->qty);
                     }
                 }
             }

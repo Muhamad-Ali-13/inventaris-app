@@ -17,7 +17,7 @@ class DatabaseSeeder extends Seeder
     {
         // Buat akun Admin
         User::updateOrCreate(
-            ['email' => 'admin@gmail.com'],
+            ['email' => 'admin@ajm.com'],
             [
                 'name' => 'Administrator',
                 'password' => Hash::make('123456789'), // ganti sesuai kebutuhan

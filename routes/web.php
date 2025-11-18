@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\{
+    AkuntansiController,
     BarangController,
     DashboardController,
     DepartemenController,
@@ -37,10 +38,21 @@ Route::middleware(['auth', 'throttle:60,1'])->group(function () {
     // ----------------------
     Route::middleware('can:role-A')->group(function () {
         // Master Data
-        Route::resource('karyawans', KaryawanController::class);
+        // Route::resource('karyawans', KaryawanController::class);
         Route::resource('departemen', DepartemenController::class);
         Route::resource('kategori', KategoriController::class);
         Route::resource('barang', BarangController::class);
+
+        Route::resource('karyawans', KaryawanController::class)->only([
+            'index',
+            'store',
+            'update',
+            'destroy'
+        ]);
+
+        // Tambahkan route spesifik untuk export dan import DI BAWAH route resource
+        Route::get('karyawans/export', [KaryawanController::class, 'export'])->name('karyawans.export');
+        Route::post('karyawans/import', [KaryawanController::class, 'import'])->name('karyawans.import');
 
         // Pemasukan
         Route::controller(PemasukanController::class)->group(function () {
@@ -84,10 +96,9 @@ Route::middleware(['auth', 'throttle:60,1'])->group(function () {
         Route::get('laporan', [LaporanController::class, 'index'])->name('laporan.index');
         Route::get('laporan/pdf', [LaporanController::class, 'exportPdf'])->name('laporan.exportPdf');
         Route::get('laporan/excel', [LaporanController::class, 'exportExcel'])->name('laporan.exportExcel');
-        Route::get('/laporan/akuntansi', [LaporanController::class, 'akuntansiIndex'])->name('laporan.akuntansi');
-        
-        Route::get('/laporan/akuntansi/export-pdf', [LaporanController::class, 'akuntansiExportPdf'])->name('laporan.akuntansi.exportPdf');
-        Route::get('/laporan/akuntansi/export-excel', [LaporanController::class, 'akuntansiExportExcel'])->name('laporan.akuntansi.exportExcel');
+        Route::get('akuntansi', [AkuntansiController::class, 'index'])->name('akuntansi.index');
+        Route::get('akuntansi/akuntansipdf', [AkuntansiController::class, 'exportPdf'])->name('akuntansi.exportPdf');
+        Route::get('akuntansi/excel', [AkuntansiController::class, 'exportExcel'])->name('akuntansi.exportExcel');
     });
 
     // ----------------------

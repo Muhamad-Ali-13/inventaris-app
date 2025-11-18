@@ -1,5 +1,5 @@
 <x-app-layout>
-
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <div class="py-10 bg-gradient-to-br from-gray-50 via-white to-green-50 min-h-screen">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-white shadow-lg rounded-2xl border border-gray-100 p-6">
@@ -25,8 +25,8 @@
                             Tampilkan
                             <select id="entries"
                                 class="border border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500">
-                                <option value="5">5</option>
-                                <option value="10" selected>10</option>
+                                <option value="5"selected>5</option>
+                                <option value="10">10</option>
                                 <option value="25">25</option>
                                 <option value="50">50</option>
                             </select>
@@ -121,7 +121,10 @@
                         </div>
                     @endforeach
                 </div>
-
+                {{-- PERUBAHAN: Tambahkan Pagination
+                <div class="mt-6 flex justify-center">
+                    {{ $kategori->links() }}
+                </div> --}}
             </div>
         </div>
     </div>
@@ -144,7 +147,8 @@
                 </div>
                 <div>
                     <label for="keterangan" class="block text-sm font-medium text-gray-600 mb-1">Keterangan</label>
-                    <textarea name="keterangan" id="keterangan" rows="3" placeholder="Contoh: Keterangan tambahan tentang kategori"
+                    <textarea name="keterangan" id="keterangan" rows="3"
+                        placeholder="Contoh: Keterangan tambahan tentang kategori"
                         class="w-full border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500 rounded-lg px-3 py-2 text-gray-800 placeholder-gray-400 transition duration-200"></textarea>
                 </div>
                 <div class="flex justify-end gap-3 pt-3 border-t">

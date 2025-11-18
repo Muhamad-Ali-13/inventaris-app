@@ -1,5 +1,5 @@
 <div x-data="{ openSidebar: false, showContent: false }" x-init="setTimeout(() => showContent = true, 100)" class="flex h-screen bg-white text-green-700">
-
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- SIDEBAR -->
     <aside :class="openSidebar ? 'translate-x-0' : '-translate-x-full md:translate-x-0'"
         class="fixed md:static top-0 left-0 w-64 h-full flex flex-col bg-white border-r border-green-200 shadow-xl transform transition-all duration-300 ease-in-out z-50">
@@ -118,7 +118,7 @@
 
             {{-- LAPORAN: Admin + Direktur --}}
             @canany(['role-A', 'role-D'])
-                <div x-data="{ openLaporan: {{ request()->routeIs('laporan.*') ? 'true' : 'false' }} }">
+                <div x-data="{ openLaporan: {{ request()->routeIs('laporan.*','akuntansi.*') ? 'true' : 'false' }} }">
                     <button @click="openLaporan = !openLaporan"
                         class="w-full flex items-center justify-between px-3 py-2 rounded-lg transition-all duration-200 hover:bg-green-50">
                         <div class="flex items-center gap-3">
@@ -134,8 +134,8 @@
                             <i class="fi fi-rr-box"></i>
                             <span>Barang</span>
                         </a>
-                        <a href="{{ route('laporan.akuntansi') }}"
-                            class="flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-all duration-200 {{ request()->routeIs('laporan.akuntansi*') ? 'bg-green-100 font-semibold text-green-800 shadow-inner ring-2 ring-green-300' : 'hover:bg-green-50 hover:translate-x-1' }}">
+                        <a href="{{ route('akuntansi.index') }}"
+                            class="flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-all duration-200 {{ request()->routeIs('akuntansi.*') ? 'bg-green-100 font-semibold text-green-800 shadow-inner ring-2 ring-green-300' : 'hover:bg-green-50 hover:translate-x-1' }}">
                             <i class="fi fi-rr-chart-pie"></i>
                             Akuntansi
                         </a>

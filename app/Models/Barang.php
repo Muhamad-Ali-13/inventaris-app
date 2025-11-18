@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\TransaksiDetail; // <-- Tambahkan ini
 
 class Barang extends Model
 {
@@ -11,7 +12,6 @@ class Barang extends Model
 
     protected $table = 'barang';
     protected $fillable = ['kode_barang', 'tanggal_masuk', 'nama_barang', 'kategori_id', 'harga_beli', 'qty','total_harga',  'satuan', 'keterangan'];
-
 
     public static function generateKode()
     {
@@ -32,8 +32,13 @@ class Barang extends Model
         return $this->belongsTo(Kategori::class, 'kategori_id');
     }
 
-    public function transaksiDetail()
+    /**
+     * ==========================================================
+     * PERBAIKAN NAMA METHOD DARI transaksiDetail MENJADI transaksiDetails
+     * ==========================================================
+     */
+    public function transaksiDetails()
     {
-        return $this->hasMany(TransaksiDetail::class, 'kode_barang','kode_barang');
+        return $this->hasMany(TransaksiDetail::class, 'kode_barang', 'kode_barang');
     }
 }

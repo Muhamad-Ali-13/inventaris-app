@@ -298,7 +298,7 @@
                         // Jika ada details, tampilkan data yang ada
                         if (details && details.length > 0) {
                             details.forEach(d => {
-                                createBarangRow(barangs, d.kode_barang, d.jumlah);
+                                createBarangRow(barangs, d.kode_barang, d.zz);
                             });
                         } else {
                             // Jika tidak ada details, buat baris kosong
@@ -467,4 +467,5 @@
             @endif
         });
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </x-app-layout>

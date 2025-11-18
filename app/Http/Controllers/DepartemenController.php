@@ -7,9 +7,28 @@ use Illuminate\Http\Request;
 
 class DepartemenController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $departemen = Departemen::all();
+        // Ambil nilai 'entries' dari request, default 10
+        $entries = $request->get('entries', 10);
+        // Ambil nilai 'search' dari request
+        $search = $request->get('search');
+
+        // Query dasar untuk mengambil departemen
+        $query = Departemen::query();
+
+        // Jika ada parameter search, tambahkan filter ke query
+        if ($search) {
+            $query->where('nama_departemen', 'like', '%' . $search . '%');
+        }
+
+        // Jalankan query dengan pagination, dan urutkan dari yang terbaru
+        $departemen = $query->latest()->paginate($entries);
+
+        // Tambahkan parameter query string ke link pagination
+        // Ini agar saat pindah halaman, filter search dan entries tetap terbawa
+        $departemen->appends($request->query());
+
         return view('departemen.index', compact('departemen'));
     }
 

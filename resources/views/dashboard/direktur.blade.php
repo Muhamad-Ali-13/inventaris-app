@@ -1,5 +1,6 @@
 {{-- resources/views/dashboard/direktur.blade.php --}}
 <x-app-layout>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <div class="min-h-screen bg-white py-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 

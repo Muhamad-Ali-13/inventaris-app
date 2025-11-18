@@ -38,84 +38,54 @@ class LaporanAkuntansiExport implements FromCollection, WithHeadings, WithTitle,
         $this->harga_max = $harga_max;
     }
 
-    public function collection()
-    {
-        $query = Barang::with(['kategori']);
+// Di dalam class LaporanAkuntansiExport
 
-        // ... (semua kode filter Anda tetap sama di sini) ...
-        if ($this->kategori_id) {
-            $query->where('kategori_id', $this->kategori_id);
-        }
+public function collection()
+{
+    $query = \App\Models\TransaksiDetail::selectRaw('
+            barang.kode_barang,
+            barang.nama_barang,
+            barang.satuan,
+            barang.harga_beli,
+            kategori.nama_kategori as kategori_nama,
+            SUM(transaksi_details.jumlah) as total_qty,
+            SUM(transaksi_details.total) as total_nilai
+        ')
+        ->join('transaksi', 'transaksi_details.kode_transaksi', '=', 'transaksi.kode_transaksi')
+        ->join('barang', 'transaksi_details.kode_barang', '=', 'barang.kode_barang')
+        ->leftJoin('kategori', 'barang.kategori_id', '=', 'kategori.id')
+        ->where('transaksi.status', 'approved');
 
-        if ($this->status_stok) {
-            if ($this->status_stok == 'aman') {
-                $query->where('qty', '>', 10);
-            } elseif ($this->status_stok == 'terbatas') {
-                $query->where('qty', '>', 0)->where('qty', '<=', 10);
-            } elseif ($this->status_stok == 'habis') {
-                $query->where('qty', '=', 0);
-            }
-        }
-
-        if ($this->harga_min) {
-            $query->where('harga_beli', '>=', $this->harga_min);
-        }
-        if ($this->harga_max) {
-            $query->where('harga_beli', '<=', $this->harga_max);
-        }
-
-        if ($this->departemen_id) {
-            $query->whereHas('transaksiDetails.transaksi', function ($query) {
-                $query->where('departemen_id', $this->departemen_id);
-            });
-        }
-
-        if ($this->tanggal_awal || $this->tanggal_akhir) {
-            $query->whereHas('transaksiDetails.transaksi', function ($query) {
-                if ($this->tanggal_awal) {
-                    $query->whereDate('tanggal_disetujui', '>=', $this->tanggal_awal);
-                }
-                if ($this->tanggal_akhir) {
-                    $query->whereDate('tanggal_disetujui', '<=', $this->tanggal_akhir);
-                }
-            });
-        }
-
-        $barangs = $query->get();
-
-        // Hitung total nilai inventaris
-        $totalNilaiInventaris = $barangs->sum('total_harga');
-
-        // Siapkan data untuk setiap baris
-        $dataRows = $barangs->map(function ($barang, $index) {
-            return [
-                'No' => $index + 1,
-                'Kode Barang' => $barang->kode_barang,
-                'Nama Barang' => $barang->nama_barang,
-                'Kategori' => $barang->kategori->nama_kategori ?? '-',
-                'Qty' => $barang->qty,
-                'Satuan' => $barang->satuan,
-                'Harga Beli' => $barang->harga_beli,
-                'Total Nilai' => $barang->total_harga,
-                'Status' => $barang->qty > 10 ? 'Aman' : ($barang->qty > 0 ? 'Terbatas' : 'Habis'),
-            ];
-        });
-
-        // Tambahkan baris total di paling akhir
-        $dataRows->push([
-            'No' => '',
-            'Kode Barang' => '',
-            'Nama Barang' => '',
-            'Kategori' => '',
-            'Qty' => '',
-            'Satuan' => '',
-            'Harga Beli' => 'TOTAL',
-            'Total Nilai' => $totalNilaiInventaris,
-            'Status' => '',
-        ]);
-
-        return $dataRows;
+    // Terapkan filter yang sama dengan controller
+    if ($this->tanggal_awal) $query->whereDate('transaksi.tanggal_disetujui', '>=', $this->tanggal_awal);
+    if ($this->tanggal_akhir) $query->whereDate('transaksi.tanggal_disetujui', '<=', $this->tanggal_akhir);
+    if ($this->kategori_id) $query->where('barang.kategori_id', $this->kategori_id);
+    if ($this->departemen_id) $query->where('transaksi.departemen_id', $this->departemen_id);
+    if ($this->harga_min) $query->where('barang.harga_beli', '>=', $this->harga_min);
+    if ($this->harga_max) $query->where('barang.harga_beli', '<=', $this->harga_max);
+    if ($this->status_stok) {
+        if ($this->status_stok == 'aman') $query->havingRaw('SUM(transaksi_details.jumlah) > 10');
+        elseif ($this->status_stok == 'terbatas') $query->havingRaw('SUM(transaksi_details.jumlah) > 0 AND SUM(transaksi_details.jumlah) <= 10');
+        elseif ($this->status_stok == 'habis') $query->havingRaw('SUM(transaksi_details.jumlah) = 0');
     }
+
+    $query->groupBy('barang.kode_barang', 'barang.nama_barang', 'barang.satuan', 'barang.harga_beli', 'kategori.nama_kategori');
+    $barangs = $query->get();
+
+    return $barangs->map(function ($barang, $index) {
+        return [
+            'No' => $index + 1,
+            'Kode Barang' => $barang->kode_barang,
+            'Nama Barang' => $barang->nama_barang,
+            'Kategori' => $barang->kategori_nama ?? '-',
+            'Qty' => $barang->total_qty,
+            'Satuan' => $barang->satuan,
+            'Harga Beli' => $barang->harga_beli,
+            'Total Nilai' => $barang->total_nilai,
+            'Status' => $barang->total_qty > 10 ? 'Aman' : ($barang->total_qty > 0 ? 'Terbatas' : 'Habis'),
+        ];
+    });
+}
 
     public function headings(): array
     {

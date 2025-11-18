@@ -84,6 +84,9 @@ return [
 
     'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
 
+    'paginator' => [
+        'view' => 'pagination::tailwind',
+    ],
     /*
     |--------------------------------------------------------------------------
     | Encryption Key
